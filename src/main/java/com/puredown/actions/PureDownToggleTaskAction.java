@@ -60,5 +60,7 @@ public class PureDownToggleTaskAction extends AnAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         e.getPresentation().setEnabled(e.getData(CommonDataKeys.EDITOR) != null);
+        e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("切换任务复选框", "Toggle Task Checkbox"));
+        e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("切换任务列表复选框 [ ] <-> [x]", "Toggle task list checkbox [ ] <-> [x]"));
     }
 }

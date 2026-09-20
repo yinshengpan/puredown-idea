@@ -69,14 +69,24 @@ public class PureDownExportHtmlAction extends AnAction {
 
         try {
             Files.writeString(fileWrapper.getFile().toPath(), fullHtml, StandardCharsets.UTF_8);
-            Messages.showInfoMessage(project, "Exported successfully to:\n" + fileWrapper.getFile().getAbsolutePath(), "PureDown Export");
+            Messages.showInfoMessage(
+                    project,
+                    com.puredown.i18n.PureDownI18n.message("已成功导出至:\n" + fileWrapper.getFile().getAbsolutePath(), "Exported successfully to:\n" + fileWrapper.getFile().getAbsolutePath()),
+                    com.puredown.i18n.PureDownI18n.message("PureDown 导出", "PureDown Export")
+            );
         } catch (Exception ex) {
-            Messages.showErrorDialog(project, "Failed to export HTML: " + ex.getMessage(), "PureDown Export Error");
+            Messages.showErrorDialog(
+                    project,
+                    com.puredown.i18n.PureDownI18n.message("导出 HTML 失败: " + ex.getMessage(), "Failed to export HTML: " + ex.getMessage()),
+                    com.puredown.i18n.PureDownI18n.message("导出错误", "PureDown Export Error")
+            );
         }
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
         e.getPresentation().setEnabled(e.getData(CommonDataKeys.EDITOR) != null);
+        e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("导出独立 HTML...", "Export as HTML..."));
+        e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("导出带完整样式的独立 HTML 文件", "Export styled standalone HTML file"));
     }
 }

@@ -16,6 +16,13 @@ public final class PureDownI18n {
             }
         } catch (Throwable ignored) {}
 
+        try {
+            Locale dbLocale = com.intellij.DynamicBundle.getLocale();
+            if (dbLocale != null) {
+                return "zh".equalsIgnoreCase(dbLocale.getLanguage());
+            }
+        } catch (Throwable ignored) {}
+
         Locale locale = Locale.getDefault();
         return "zh".equalsIgnoreCase(locale.getLanguage());
     }

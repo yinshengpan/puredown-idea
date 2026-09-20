@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.puredown.PureDownIcons;
+import com.puredown.i18n.PureDownI18n;
 import org.jetbrains.annotations.NotNull;
 
 public class PureDownTableActions {
@@ -26,13 +27,19 @@ public class PureDownTableActions {
 
             boolean formatted = PureDownTableFormatter.formatTableAtCaret(project, editor.getDocument(), editor.getCaretModel().getOffset());
             if (!formatted) {
-                Messages.showInfoMessage(project, "Caret is not inside a Markdown table.", "PureDown Table");
+                Messages.showInfoMessage(
+                        project,
+                        PureDownI18n.message("光标当前未位于 Markdown 表格内。", "Caret is not inside a Markdown table."),
+                        PureDownI18n.message("PureDown 表格", "PureDown Table")
+                );
             }
         }
 
         @Override
         public void update(@NotNull AnActionEvent e) {
             e.getPresentation().setEnabled(e.getData(CommonDataKeys.EDITOR) != null);
+            e.getPresentation().setText(PureDownI18n.message("格式化表格", "Format Table"));
+            e.getPresentation().setDescription(PureDownI18n.message("对齐排版 Markdown 表格各列", "Align and format Markdown table"));
         }
     }
 
@@ -60,6 +67,8 @@ public class PureDownTableActions {
         @Override
         public void update(@NotNull AnActionEvent e) {
             e.getPresentation().setEnabled(e.getData(CommonDataKeys.EDITOR) != null);
+            e.getPresentation().setText(PureDownI18n.message("插入表格", "Insert Table"));
+            e.getPresentation().setDescription(PureDownI18n.message("插入标准 Markdown 表格模板", "Insert a new Markdown table"));
         }
     }
 }

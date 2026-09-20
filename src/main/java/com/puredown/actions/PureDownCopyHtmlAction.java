@@ -29,11 +29,16 @@ public class PureDownCopyHtmlAction extends AnAction {
 
         String html = PureDownHtmlGenerator.generateHtml(text);
         CopyPasteManager.getInstance().setContents(new StringSelection(html));
-        Messages.showInfoMessage("Rendered HTML copied to clipboard.", "PureDown");
+        Messages.showInfoMessage(
+                com.puredown.i18n.PureDownI18n.message("渲染后的富文本 HTML 已成功复制到剪贴板。", "Rendered HTML copied to clipboard."),
+                "PureDown"
+        );
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
         e.getPresentation().setEnabled(e.getData(CommonDataKeys.EDITOR) != null);
+        e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("复制富文本 HTML", "Copy Rendered HTML"));
+        e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("复制文档渲染后的富文本 HTML 到剪贴板", "Copy rendered HTML to clipboard"));
     }
 }

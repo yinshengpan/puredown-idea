@@ -25,6 +25,28 @@ public class PureDownSettings implements PersistentStateComponent<PureDownSettin
     private boolean enableKatex = true;
     private boolean enableMermaid = true;
 
+    public interface SettingsChangeListener {
+        void onSettingsChanged();
+    }
+
+    private final java.util.List<SettingsChangeListener> listeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    public void addSettingsChangeListener(SettingsChangeListener l) {
+        listeners.add(l);
+    }
+
+    public void removeSettingsChangeListener(SettingsChangeListener l) {
+        listeners.remove(l);
+    }
+
+    public void fireSettingsChanged() {
+        for (SettingsChangeListener l : listeners) {
+            try {
+                l.onSettingsChanged();
+            } catch (Throwable ignored) {}
+        }
+    }
+
     public static PureDownSettings getInstance() {
         return ApplicationManager.getApplication().getService(PureDownSettings.class);
     }

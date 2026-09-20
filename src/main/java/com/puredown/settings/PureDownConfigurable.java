@@ -164,6 +164,7 @@ public class PureDownConfigurable implements SearchableConfigurable {
         settings.setEnableKatex(enableKatexCheckBox.isSelected());
         settings.setEnableMermaid(enableMermaidCheckBox.isSelected());
         settings.setEnableLightbox(enableLightboxCheckBox.isSelected());
+        settings.fireSettingsChanged();
     }
 
     @Override

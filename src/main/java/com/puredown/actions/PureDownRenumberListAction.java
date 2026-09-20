@@ -73,5 +73,7 @@ public class PureDownRenumberListAction extends AnAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         e.getPresentation().setEnabled(e.getData(CommonDataKeys.EDITOR) != null);
+        e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("重新连续编号", "Renumber Ordered List"));
+        e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("自动修复有序列表序号为连续数字", "Automatically fix sequential numbers in ordered list"));
     }
 }

@@ -47,6 +47,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
 
     private SplitLayoutMode layoutMode = SplitLayoutMode.SPLIT;
     private boolean isSyncScrollEnabled = true;
+    private ActionToolbar actionToolbar;
 
     public PureDownSplitEditor(Project project, VirtualFile file, TextEditor textEditor) {
         this.project = project;
@@ -73,6 +74,20 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
 
         // Apply initial layout mode from settings
         setLayoutMode(this.layoutMode);
+
+        // Settings change listener for instant dynamic i18n & preference updates
+        PureDownSettings.SettingsChangeListener settingsListener = () -> {
+            if (actionToolbar != null) {
+                actionToolbar.updateActionsImmediately();
+            }
+            if (statusBarPanel != null) {
+                statusBarPanel.updateCaretInfo();
+                statusBarPanel.updateStats();
+            }
+            schedulePreviewUpdate(0);
+        };
+        settings.addSettingsChangeListener(settingsListener);
+        Disposer.register(this, () -> settings.removeSettingsChangeListener(settingsListener));
 
         // Real-time live update
         textEditor.getEditor().getDocument().addDocumentListener(new DocumentListener() {
@@ -108,6 +123,12 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
             public void actionPerformed(@NotNull AnActionEvent e) {
                 setLayoutMode(SplitLayoutMode.EDITOR_ONLY);
             }
+
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("仅编辑", "Editor Only"));
+                e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("仅显示编辑器单栏", "Show editor only"));
+            }
         });
         actionGroup.add(new AnAction(
                 com.puredown.i18n.PureDownI18n.message("双栏分屏", "Split Mode"),
@@ -117,6 +138,12 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
             public void actionPerformed(@NotNull AnActionEvent e) {
                 setLayoutMode(SplitLayoutMode.SPLIT);
             }
+
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("双栏分屏", "Split Mode"));
+                e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("同时显示编辑与即时预览", "Show editor and preview side-by-side"));
+            }
         });
         actionGroup.add(new AnAction(
                 com.puredown.i18n.PureDownI18n.message("仅预览", "Preview Only"),
@@ -125,6 +152,12 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 setLayoutMode(SplitLayoutMode.PREVIEW_ONLY);
+            }
+
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("仅预览", "Preview Only"));
+                e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("仅显示渲染预览单栏", "Show preview only"));
             }
         });
 
@@ -142,6 +175,13 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
             @Override
             public void setSelected(@NotNull AnActionEvent e, boolean state) {
                 isSyncScrollEnabled = state;
+            }
+
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                super.update(e);
+                e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("同步滚动", "Sync Scroll"));
+                e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("双向同步编辑与预览滚动条", "Synchronize editor and preview scroll position"));
             }
         });
 
@@ -161,6 +201,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
 
         ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("PureDownEditorToolbar", actionGroup, true);
         toolbar.setTargetComponent(rootPanel);
+        this.actionToolbar = toolbar;
         JComponent comp = toolbar.getComponent();
         comp.setBorder(JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0));
         return comp;

@@ -54,8 +54,9 @@ public class PureDownInsertCalloutAction extends AnAction {
         Editor editor = e.getData(CommonDataKeys.EDITOR);
         if (project == null || editor == null) return;
 
+        String popupTitle = com.puredown.i18n.PureDownI18n.message("选择标注框类型", "Select Callout Type");
         JBPopupFactory.getInstance().createPopupChooserBuilder(CALLOUT_TYPES)
-            .setTitle("Select Callout Type")
+            .setTitle(popupTitle)
             .setItemChosenCallback(chosen -> insertCallout(editor, chosen.type))
             .createPopup()
             .showInBestPositionFor(editor);
@@ -67,7 +68,8 @@ public class PureDownInsertCalloutAction extends AnAction {
         Document document = editor.getDocument();
         SelectionModel selectionModel = editor.getSelectionModel();
 
-        String selectedText = selectionModel.hasSelection() ? selectionModel.getSelectedText() : "Callout content here.";
+        String defaultContent = com.puredown.i18n.PureDownI18n.message("此处填写标注内容。", "Callout content here.");
+        String selectedText = selectionModel.hasSelection() ? selectionModel.getSelectedText() : defaultContent;
         String snippet = "\n> [!" + type + "]\n> " + selectedText + "\n\n";
 
         WriteCommandAction.runWriteCommandAction(project, "Insert Callout", null, () -> {
@@ -84,5 +86,7 @@ public class PureDownInsertCalloutAction extends AnAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         e.getPresentation().setEnabled(e.getData(CommonDataKeys.EDITOR) != null);
+        e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("插入标注框...", "Insert Obsidian Callout..."));
+        e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("插入各类高亮提示框 (Note, Tip, Warning...)", "Insert styled callout note"));
     }
 }
