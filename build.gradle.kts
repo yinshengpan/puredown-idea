@@ -32,4 +32,16 @@ tasks {
     buildSearchableOptions {
         enabled = false
     }
+    runPluginVerifier {
+        localPaths.set(listOf(
+            file("/Applications/IntelliJ IDEA.app/Contents"),
+            file("/Applications/Android Studio.app/Contents")
+        ))
+        ideVersions.set(listOf(
+            "IU-2023.3.8",
+            "IU-2024.1.7",
+            "IU-2024.2.6",
+            "IU-2024.3.5"
+        ))
+    }
 }

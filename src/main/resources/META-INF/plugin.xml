@@ -45,7 +45,7 @@
 
     <!-- Works on all IntelliJ Platform IDEs including IntelliJ IDEA and Android Studio -->
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.jcef</depends>
+    <depends optional="true" config-file="puredown-jcef.xml">com.intellij.modules.jcef</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- FileType Registration -->

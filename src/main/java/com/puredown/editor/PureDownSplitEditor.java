@@ -80,7 +80,11 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
         // Settings change listener for instant dynamic i18n & preference updates
         PureDownSettings.SettingsChangeListener settingsListener = () -> {
             if (actionToolbar != null) {
-                actionToolbar.updateActionsAsync();
+                try {
+                    ActionToolbar.class.getMethod("updateActionsAsync").invoke(actionToolbar);
+                } catch (Throwable ignored) {
+                    actionToolbar.updateActionsImmediately();
+                }
             }
             if (statusBarPanel != null) {
                 statusBarPanel.updateCaretInfo();
