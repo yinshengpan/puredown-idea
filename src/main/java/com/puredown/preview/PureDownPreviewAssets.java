@@ -51,7 +51,7 @@ public final class PureDownPreviewAssets {
 
         File targetDir;
         try {
-            String sysPath = PathManager.getPluginTempPath();
+            String sysPath = PathManager.getTempPath();
             targetDir = new File(sysPath, "puredown_preview_v2");
         } catch (Throwable t) {
             targetDir = new File(System.getProperty("java.io.tmpdir"), "puredown_preview_v2");

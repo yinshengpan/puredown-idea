@@ -1,5 +1,6 @@
 package com.puredown.editor;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -17,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 
-public class PureDownStatusBarPanel extends JPanel {
+public class PureDownStatusBarPanel extends JPanel implements Disposable {
 
     private final JLabel fileLabel = new JLabel();
     private final JLabel cursorLabel = new JLabel();
@@ -87,7 +88,7 @@ public class PureDownStatusBarPanel extends JPanel {
             public void documentChanged(@NotNull DocumentEvent event) {
                 updateStats();
             }
-        });
+        }, this);
 
         updateCaretInfo();
         updateStats();
@@ -197,4 +198,7 @@ public class PureDownStatusBarPanel extends JPanel {
 
         return new DocumentStats(charCount, wordCount, lineCount, readingMinutes);
     }
+
+    @Override
+    public void dispose() {}
 }

@@ -4,8 +4,10 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
+import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.util.ui.UIUtil;
 import com.puredown.obsidian.PureDownWikiLinkResolver;
@@ -44,7 +46,7 @@ public class PureDownJBCefPreview implements Disposable {
                 JBCefBrowser browser = new JBCefBrowser();
                 this.jbCefBrowser = browser;
 
-                JBCefJSQuery jsQuery = JBCefJSQuery.create(browser);
+                JBCefJSQuery jsQuery = JBCefJSQuery.create((JBCefBrowserBase) browser);
                 jsQuery.addHandler(request -> {
                     handleJsRequest(request);
                     return null;
@@ -56,7 +58,7 @@ public class PureDownJBCefPreview implements Disposable {
                         isBrowserLoaded = true;
                         String injectBridgeJs = "window.cefQuery = function(obj) {" +
                                 jsQuery.inject("obj.request") + "};\n" +
-                                "window.setTheme(" + UIUtil.isUnderDarcula() + ");";
+                                "window.setTheme(" + !JBColor.isBright() + ");";
                         browser.getCefBrowser().executeJavaScript(injectBridgeJs, browser.getCefBrowser().getURL(), 0);
 
                         if (pendingMarkdown != null) {
@@ -144,14 +146,14 @@ public class PureDownJBCefPreview implements Disposable {
                 return;
             }
 
-            boolean isDark = UIUtil.isUnderDarcula();
+            boolean isDark = !JBColor.isBright();
             String escapedJson = jsonEncode(htmlContent);
             String js = "if (window.setTheme) window.setTheme(" + isDark + ");\n" +
                     "if (window.updateContent) window.updateContent(" + escapedJson + ");";
 
             jbCefBrowser.getCefBrowser().executeJavaScript(js, jbCefBrowser.getCefBrowser().getURL(), 0);
         } else if (fallbackPane != null) {
-            boolean isDark = UIUtil.isUnderDarcula();
+            boolean isDark = !JBColor.isBright();
             String bg = isDark ? "#1e1f22" : "#ffffff";
             String fg = isDark ? "#bcbec4" : "#24292f";
             String fallbackHtml = "<html><body style='background-color:" + bg + "; color:" + fg + "; font-family:sans-serif; padding:16px;'>" + htmlContent + "</body></html>";

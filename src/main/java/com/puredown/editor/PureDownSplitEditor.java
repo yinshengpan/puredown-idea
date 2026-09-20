@@ -48,6 +48,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
     private SplitLayoutMode layoutMode = SplitLayoutMode.SPLIT;
     private boolean isSyncScrollEnabled = true;
     private ActionToolbar actionToolbar;
+    private volatile boolean myDisposed = false;
 
     public PureDownSplitEditor(Project project, VirtualFile file, TextEditor textEditor) {
         this.project = project;
@@ -63,6 +64,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
 
         Disposer.register(this, textEditor);
         Disposer.register(this, preview);
+        Disposer.register(this, statusBarPanel);
 
         splitter.setFirstComponent(textEditor.getComponent());
         splitter.setSecondComponent(preview.getComponent());
@@ -78,7 +80,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
         // Settings change listener for instant dynamic i18n & preference updates
         PureDownSettings.SettingsChangeListener settingsListener = () -> {
             if (actionToolbar != null) {
-                actionToolbar.updateActionsImmediately();
+                actionToolbar.updateActionsAsync();
             }
             if (statusBarPanel != null) {
                 statusBarPanel.updateCaretInfo();
@@ -235,7 +237,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
     private void schedulePreviewUpdate(int delayMs) {
         updateAlarm.cancelAllRequests();
         updateAlarm.addRequest(() -> {
-            if (!Disposer.isDisposed(this)) {
+            if (!myDisposed) {
                 String md = textEditor.getEditor().getDocument().getText();
                 preview.renderMarkdown(md);
             }
@@ -305,6 +307,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
 
     @Override
     public void dispose() {
+        myDisposed = true;
         floatingToolbar.hideToolbar();
         updateAlarm.cancelAllRequests();
     }

@@ -36,7 +36,7 @@ public class PureDownExportHtmlAction extends AnAction {
                 ? psiFile.getVirtualFile().getNameWithoutExtension()
                 : "document";
 
-        FileSaverDescriptor descriptor = new FileSaverDescriptor("Export HTML", "Choose destination for exported HTML file", "html");
+        FileSaverDescriptor descriptor = new FileSaverDescriptor("Export HTML", "Choose destination for exported HTML file", new String[]{"html"});
         FileSaverDialog dialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project);
         VirtualFileWrapper fileWrapper = dialog.save(psiFile != null && psiFile.getVirtualFile() != null ? psiFile.getVirtualFile().getParent() : null, baseName + ".html");
         if (fileWrapper == null) return;

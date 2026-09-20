@@ -2,6 +2,7 @@ package com.puredown.obsidian.graph;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
@@ -34,7 +35,7 @@ public class PureDownVaultGraphPanel extends JPanel {
         this.project = project;
         this.graphData = graphData;
 
-        setBackground(UIUtil.isUnderDarcula() ? new Color(30, 31, 34) : new Color(248, 249, 250));
+        setBackground(!JBColor.isBright() ? new Color(30, 31, 34) : new Color(248, 249, 250));
         setFocusable(true);
 
         MouseAdapter mouseAdapter = new MouseAdapter() {
@@ -194,7 +195,7 @@ public class PureDownVaultGraphPanel extends JPanel {
         for (GraphNode n : graphData.getNodes()) {
             nodesById.put(n.getId(), n);
         }
-        boolean isDark = UIUtil.isUnderDarcula();
+        boolean isDark = !JBColor.isBright();
 
         // 1. Draw Edges
         Color edgeColor = isDark ? new Color(70, 75, 85, 180) : new Color(200, 205, 215, 200);
