@@ -1,0 +1,146 @@
+<idea-plugin>
+    <id>com.puredown.markdown</id>
+    <name>PureDown</name>
+    <vendor email="support@puredown.com" url="https://github.com/puredown/puredown">PureDown</vendor>
+
+    <description><![CDATA[
+    <h3>PureDown - Modern Markdown & Obsidian-Grade Knowledge Workspace for IntelliJ IDEA & Android Studio</h3>
+    <p>PureDown blends the essential editing power of the official Markdown plugin with the advanced superpowers of Markdown Pro:</p>
+    <ul>
+        <li><b>Seamless In-Place Split Editor:</b> High-performance bidirectional synchronized scrolling with 3 layout modes (Editor Only, Split, Preview Only).</li>
+        <li><b>Floating Formatting Toolbar:</b> Format selections instantly (Bold, Italic, Strikethrough, Code, Quote, Links, Task lists).</li>
+        <li><b>Full-Featured Table Editor & Formatter:</b> In-place Markdown table alignment with CJK fullwidth support, automatic column padding, row/column insertion, and quick formatting.</li>
+        <li><b>Smart Task Lists & Ordered Lists:</b> One-click interactive checkbox toggle (<code>- [ ]</code> &harr; <code>- [x]</code>) in both preview and editor, plus auto-renumbering of sequential lists.</li>
+        <li><b>Obsidian Vault & Knowledge Base Power:</b>
+            <ul>
+                <li><code>[[WikiLinks]]</code> resolution and auto-completion with Ctrl/Cmd+Click navigation.</li>
+                <li>Obsidian Callouts (<code>[!NOTE]</code>, <code>[!TIP]</code>, <code>[!WARNING]</code>, <code>[!DANGER]</code>, <code>[!SUCCESS]</code>, etc.) rendered with styled colored badges and icons.</li>
+                <li>Interactive 2D <b>Knowledge Vault Graph</b> showing note connection nodes, physics layout, and search.</li>
+            </ul>
+        </li>
+        <li><b>Rich Preview:</b> Math / LaTeX formulas (KaTeX), Mermaid diagrams, syntax-highlighted code blocks, dark/light theme auto-adaptation.</li>
+        <li><b>Inspections & Quick Fixes:</b> PSI inspections for skipped heading hierarchy, unaligned tables, and empty links.</li>
+        <li><b>Export & Clipboard:</b> One-click Copy as Rendered HTML and Standalone HTML file export.</li>
+    </ul>
+    ]]></description>
+
+    <change-notes><![CDATA[
+    <b>Version 1.0.0</b>
+    <ul>
+        <li>Initial release of PureDown for IntelliJ IDEA and Android Studio.</li>
+        <li>Full split editor with JCEF preview and bidirectional smooth scroll synchronization.</li>
+        <li>Floating formatting toolbar for selections.</li>
+        <li>Table alignment engine with CJK display width support.</li>
+        <li>Interactive task checkbox toggle.</li>
+        <li>Obsidian wikilinks completion & navigation.</li>
+        <li>Obsidian callouts rendering.</li>
+        <li>Interactive 2D Knowledge Vault Graph.</li>
+        <li>Markdown inspections (heading hierarchy, tables, links).</li>
+    </ul>
+    ]]></change-notes>
+
+    <!-- Works on all IntelliJ Platform IDEs including IntelliJ IDEA and Android Studio -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- FileType Registration -->
+        <fileType name="PureDown"
+                  implementationClass="com.puredown.PureDownFileType"
+                  fieldName="INSTANCE"
+                  extensions="md;markdown;mdx"/>
+
+        <!-- Split Editor Provider -->
+        <fileEditorProvider implementation="com.puredown.editor.PureDownSplitEditorProvider"/>
+
+        <!-- Completion -->
+        <completion.contributor language="any"
+                                implementationClass="com.puredown.obsidian.PureDownWikiLinkCompletionContributor"/>
+
+        <!-- Inspections -->
+        <localInspection language="any"
+                         shortName="PureDownHeadingInspection"
+                         displayName="PureDown: Skipped heading level"
+                         groupName="PureDown Markdown"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.puredown.inspection.PureDownHeadingInspection"/>
+
+        <localInspection language="any"
+                         shortName="PureDownTableInspection"
+                         displayName="PureDown: Unaligned Markdown table"
+                         groupName="PureDown Markdown"
+                         enabledByDefault="true"
+                         level="WEAK WARNING"
+                         implementationClass="com.puredown.inspection.PureDownTableInspection"/>
+
+        <localInspection language="any"
+                         shortName="PureDownLinkInspection"
+                         displayName="PureDown: Empty link"
+                         groupName="PureDown Markdown"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.puredown.inspection.PureDownLinkInspection"/>
+
+        <!-- Application Settings Service & Configurable -->
+        <applicationService serviceImplementation="com.puredown.settings.PureDownSettings"/>
+        <applicationConfigurable instance="com.puredown.settings.PureDownConfigurable"
+                                 id="com.puredown.settings"
+                                 displayName="PureDown"
+                                 groupId="tools"/>
+    </extensions>
+
+    <actions>
+        <group id="PureDown.ActionGroup" text="PureDown" description="PureDown Markdown Actions" popup="true" icon="/icons/puredown.svg">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+
+            <action id="PureDown.ToggleTask"
+                    class="com.puredown.actions.PureDownToggleTaskAction"
+                    text="Toggle Task Checkbox"
+                    description="Toggle task list checkbox [ ] &lt;-&gt; [x]">
+                <keyboard-shortcut keymap="$default" first-keystroke="shift meta X"/>
+                <keyboard-shortcut keymap="Default for XWin" first-keystroke="shift control X"/>
+            </action>
+
+            <action id="PureDown.FormatTable"
+                    class="com.puredown.table.PureDownTableActions$FormatTableAction"
+                    text="Format Markdown Table"
+                    description="Align and format table columns">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt meta T"/>
+                <keyboard-shortcut keymap="Default for XWin" first-keystroke="alt control T"/>
+            </action>
+
+            <action id="PureDown.InsertTable"
+                    class="com.puredown.table.PureDownTableActions$InsertTableAction"
+                    text="Insert Markdown Table"
+                    description="Insert a starter markdown table"/>
+
+            <action id="PureDown.InsertCallout"
+                    class="com.puredown.actions.PureDownInsertCalloutAction"
+                    text="Insert Obsidian Callout..."
+                    description="Insert styled note callout"/>
+
+            <action id="PureDown.RenumberList"
+                    class="com.puredown.actions.PureDownRenumberListAction"
+                    text="Renumber Ordered List"
+                    description="Auto-fix sequential numbering in ordered list"/>
+
+            <separator/>
+
+            <action id="PureDown.ShowVaultGraph"
+                    class="com.puredown.actions.PureDownShowVaultGraphAction"
+                    text="Show Knowledge Vault Graph"
+                    description="Open visual note graph"/>
+
+            <action id="PureDown.CopyRenderedHtml"
+                    class="com.puredown.actions.PureDownCopyHtmlAction"
+                    text="Copy Rendered HTML"
+                    description="Copy document HTML to clipboard"/>
+
+            <action id="PureDown.ExportHtml"
+                    class="com.puredown.actions.PureDownExportHtmlAction"
+                    text="Export as Standalone HTML..."
+                    description="Export styled HTML file"/>
+        </group>
+    </actions>
+</idea-plugin>
