@@ -74,13 +74,6 @@ public final class PureDownHtmlGenerator {
             String line = rawLines[i];
             String trimmed = line.trim();
 
-            // Auto-close unclosed HTML table if a block boundary is encountered
-            if (inHtmlTable && (trimmed.startsWith("```") || trimmed.startsWith("#") ||
-                    trimmed.matches("^(-{3,}|\\*{3,}|_{3,})$") || trimmed.startsWith("> [!"))) {
-                out.append("</table>\n");
-                inHtmlTable = false;
-            }
-
             // 1. [TOC] marker
             if (TOC_PATTERN.matcher(trimmed).matches()) {
                 out.append("<!--IN_DOC_TOC_PLACEHOLDER-->\n");

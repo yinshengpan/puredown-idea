@@ -17,6 +17,7 @@ public final class PureDownPreviewAssets {
             "vendor/katex.min.css",
             "vendor/katex.min.js",
             "vendor/mermaid.min.js",
+            "vendor/marked.min.js",
             "vendor/fonts/KaTeX_AMS-Regular.woff2",
             "vendor/fonts/KaTeX_Caligraphic-Bold.woff2",
             "vendor/fonts/KaTeX_Caligraphic-Regular.woff2",

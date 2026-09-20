@@ -253,6 +253,22 @@ table tr:nth-child(2n) {
     background-color: var(--pd-table-stripe);
 }
 
+/* Nested tables & code blocks inside table cells */
+table td table {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    background-color: var(--pd-bg);
+    border: 1px solid var(--pd-border);
+}
+table td table th {
+    background-color: rgba(128, 128, 128, 0.08);
+}
+table td .code-block-wrapper {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
 /* Lists */
 ul, ol {
     margin-top: 0;
