@@ -15,6 +15,8 @@ import com.puredown.PureDownIcons;
 import com.puredown.preview.PureDownHtmlGenerator;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Constructor;
+
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -36,7 +38,7 @@ public class PureDownExportHtmlAction extends AnAction {
                 ? psiFile.getVirtualFile().getNameWithoutExtension()
                 : "document";
 
-        FileSaverDescriptor descriptor = new FileSaverDescriptor("Export HTML", "Choose destination for exported HTML file", new String[]{"html"});
+        FileSaverDescriptor descriptor = createFileSaverDescriptor("Export HTML", "Choose destination for exported HTML file");
         FileSaverDialog dialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project);
         VirtualFileWrapper fileWrapper = dialog.save(psiFile != null && psiFile.getVirtualFile() != null ? psiFile.getVirtualFile().getParent() : null, baseName + ".html");
         if (fileWrapper == null) return;
@@ -88,5 +90,19 @@ public class PureDownExportHtmlAction extends AnAction {
         e.getPresentation().setEnabled(e.getData(CommonDataKeys.EDITOR) != null);
         e.getPresentation().setText(com.puredown.i18n.PureDownI18n.message("导出独立 HTML...", "Export as HTML..."));
         e.getPresentation().setDescription(com.puredown.i18n.PureDownI18n.message("导出带完整样式的独立 HTML 文件", "Export styled standalone HTML file"));
+    }
+
+    private static FileSaverDescriptor createFileSaverDescriptor(String title, String description) {
+        try {
+            Constructor<FileSaverDescriptor> ctor = FileSaverDescriptor.class.getConstructor(String.class, String.class);
+            return ctor.newInstance(title, description);
+        } catch (Throwable ignored) {
+            try {
+                Constructor<FileSaverDescriptor> ctor = FileSaverDescriptor.class.getConstructor(String.class, String.class, String[].class);
+                return ctor.newInstance(title, description, new String[]{"html"});
+            } catch (Throwable t) {
+                throw new RuntimeException("Failed to instantiate FileSaverDescriptor", t);
+            }
+        }
     }
 }

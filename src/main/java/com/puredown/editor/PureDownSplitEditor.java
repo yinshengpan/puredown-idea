@@ -83,7 +83,9 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
                 try {
                     ActionToolbar.class.getMethod("updateActionsAsync").invoke(actionToolbar);
                 } catch (Throwable ignored) {
-                    actionToolbar.updateActionsImmediately();
+                    try {
+                        ActionToolbar.class.getMethod("updateActionsImmediately").invoke(actionToolbar);
+                    } catch (Throwable ignored2) {}
                 }
             }
             if (statusBarPanel != null) {
