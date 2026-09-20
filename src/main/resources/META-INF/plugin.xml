@@ -27,6 +27,14 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <b>Version 1.0.1</b>
+    <ul>
+        <li>Full binary compatibility verification across IntelliJ Platform 2023.3 - 2026.3 and Android Studio.</li>
+        <li>Enhanced JCEF modular dependency handling for strict isolation environments.</li>
+        <li>Refined FileSaverDescriptor cross-version compatibility for HTML export.</li>
+        <li>Optimized dynamic theme detection and non-blocking toolbar updates.</li>
+        <li>Resolved file type language descriptor warnings.</li>
+    </ul>
     <b>Version 1.0.0</b>
     <ul>
         <li>Initial release of PureDown for IntelliJ IDEA and Android Studio.</li>
