@@ -32,15 +32,15 @@ public class PureDownFloatingToolbar {
                 BorderFactory.createEmptyBorder(2, 4, 2, 4)
         ));
 
-        addFormatButton("B", "Bold (Ctrl/Cmd+B)", PureDownIcons.BOLD, () -> wrapSelection("**", "**"));
-        addFormatButton("I", "Italic (Ctrl/Cmd+I)", PureDownIcons.ITALIC, () -> wrapSelection("*", "*"));
-        addFormatButton("S", "Strikethrough", PureDownIcons.STRIKETHROUGH, () -> wrapSelection("~~", "~~"));
-        addFormatButton("`", "Inline Code", PureDownIcons.CODE, () -> wrapSelection("`", "`"));
-        addFormatButton("Link", "Insert Link", PureDownIcons.LINK, () -> {
+        addFormatButton("B", com.puredown.i18n.PureDownI18n.message("粗体 (⌘B)", "Bold (⌘B)"), PureDownIcons.BOLD, () -> wrapSelection("**", "**"));
+        addFormatButton("I", com.puredown.i18n.PureDownI18n.message("斜体 (⌘I)", "Italic (⌘I)"), PureDownIcons.ITALIC, () -> wrapSelection("*", "*"));
+        addFormatButton("S", com.puredown.i18n.PureDownI18n.message("删除线", "Strikethrough"), PureDownIcons.STRIKETHROUGH, () -> wrapSelection("~~", "~~"));
+        addFormatButton("`", com.puredown.i18n.PureDownI18n.message("行内代码", "Inline Code"), PureDownIcons.CODE, () -> wrapSelection("`", "`"));
+        addFormatButton("Link", com.puredown.i18n.PureDownI18n.message("插入超链接", "Insert Link"), PureDownIcons.LINK, () -> {
             String selected = editor.getSelectionModel().getSelectedText();
             replaceSelection("[" + (selected != null ? selected : "text") + "](url)");
         });
-        addFormatButton("Quote", "Blockquote", PureDownIcons.QUOTE, () -> {
+        addFormatButton("Quote", com.puredown.i18n.PureDownI18n.message("引用区块", "Blockquote"), PureDownIcons.QUOTE, () -> {
             String selected = editor.getSelectionModel().getSelectedText();
             if (selected != null) {
                 String[] lines = selected.split("\n", -1);
@@ -52,7 +52,7 @@ public class PureDownFloatingToolbar {
                 replaceSelection(sb.toString());
             }
         });
-        addFormatButton("Task", "Task List Item", PureDownIcons.TASK, () -> {
+        addFormatButton("Task", com.puredown.i18n.PureDownI18n.message("任务列表项", "Task List Item"), PureDownIcons.TASK, () -> {
             String selected = editor.getSelectionModel().getSelectedText();
             if (selected != null) {
                 String[] lines = selected.split("\n", -1);

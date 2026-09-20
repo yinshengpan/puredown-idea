@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public class PureDownSettings implements PersistentStateComponent<PureDownSettings> {
 
     private SplitLayoutMode defaultLayoutMode = SplitLayoutMode.SPLIT;
+    private com.puredown.i18n.AppLanguage language = com.puredown.i18n.AppLanguage.AUTO;
     private boolean syncScrolling = true;
     private boolean showStatusBarStats = true;
     private boolean enableYamlFrontMatter = true;
@@ -45,6 +46,14 @@ public class PureDownSettings implements PersistentStateComponent<PureDownSettin
 
     public void setDefaultLayoutMode(SplitLayoutMode defaultLayoutMode) {
         this.defaultLayoutMode = defaultLayoutMode;
+    }
+
+    public com.puredown.i18n.AppLanguage getLanguage() {
+        return language != null ? language : com.puredown.i18n.AppLanguage.AUTO;
+    }
+
+    public void setLanguage(com.puredown.i18n.AppLanguage language) {
+        this.language = language;
     }
 
     public boolean isSyncScrolling() {

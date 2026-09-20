@@ -105,7 +105,10 @@ public class PureDownStatusBarPanel extends JPanel {
         LogicalPosition pos = caretModel.getLogicalPosition();
         int line = pos.line + 1;
         int col = pos.column + 1;
-        cursorLabel.setText(String.format("行 %d, 列 %d", line, col));
+        cursorLabel.setText(com.puredown.i18n.PureDownI18n.message(
+                String.format("行 %d, 列 %d", line, col),
+                String.format("Ln %d, Col %d", line, col)
+        ));
 
         String fileName = file != null ? file.getName() : "Untitled";
         fileLabel.setText("📄 " + fileName);
@@ -122,8 +125,14 @@ public class PureDownStatusBarPanel extends JPanel {
         String text = doc.getText();
         DocumentStats stats = calculateStats(text);
 
-        statsLabel.setText(String.format("%d 字符  %d 词  %d 行", stats.charCount, stats.wordCount, stats.lineCount));
-        readingTimeLabel.setText(String.format("⏱️ 约 %d 分钟阅读", stats.readingTimeMinutes));
+        statsLabel.setText(com.puredown.i18n.PureDownI18n.message(
+                String.format("%d 字符  %d 词  %d 行", stats.charCount, stats.wordCount, stats.lineCount),
+                String.format("%d chars  %d words  %d lines", stats.charCount, stats.wordCount, stats.lineCount)
+        ));
+        readingTimeLabel.setText(com.puredown.i18n.PureDownI18n.message(
+                String.format("⏱️ 约 %d 分钟阅读", stats.readingTimeMinutes),
+                String.format("⏱️ ~%d min read", stats.readingTimeMinutes)
+        ));
     }
 
     private static class DocumentStats {

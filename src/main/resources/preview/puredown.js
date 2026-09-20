@@ -43,7 +43,8 @@
         const text = codeElem.innerText;
         navigator.clipboard.writeText(text).then(function() {
             const originalText = button.innerHTML;
-            button.innerHTML = '✅ 已复制';
+            const isEnglish = originalText.indexOf('Copy') !== -1;
+            button.innerHTML = isEnglish ? '✅ Copied' : '✅ 已复制';
             button.style.borderColor = '#2e7d32';
             setTimeout(function() {
                 button.innerHTML = originalText;

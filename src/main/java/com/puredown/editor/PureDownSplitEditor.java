@@ -100,19 +100,28 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
     private JComponent createToolbar() {
         DefaultActionGroup actionGroup = new DefaultActionGroup();
 
-        actionGroup.add(new AnAction("Editor Only", "Show editor only", PureDownIcons.EDITOR) {
+        actionGroup.add(new AnAction(
+                com.puredown.i18n.PureDownI18n.message("仅编辑", "Editor Only"),
+                com.puredown.i18n.PureDownI18n.message("仅显示编辑器单栏", "Show editor only"),
+                PureDownIcons.EDITOR) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 setLayoutMode(SplitLayoutMode.EDITOR_ONLY);
             }
         });
-        actionGroup.add(new AnAction("Split Mode", "Show editor and preview side-by-side", PureDownIcons.SPLIT) {
+        actionGroup.add(new AnAction(
+                com.puredown.i18n.PureDownI18n.message("双栏分屏", "Split Mode"),
+                com.puredown.i18n.PureDownI18n.message("同时显示编辑与即时预览", "Show editor and preview side-by-side"),
+                PureDownIcons.SPLIT) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 setLayoutMode(SplitLayoutMode.SPLIT);
             }
         });
-        actionGroup.add(new AnAction("Preview Only", "Show preview only", PureDownIcons.PREVIEW) {
+        actionGroup.add(new AnAction(
+                com.puredown.i18n.PureDownI18n.message("仅预览", "Preview Only"),
+                com.puredown.i18n.PureDownI18n.message("仅显示渲染预览单栏", "Show preview only"),
+                PureDownIcons.PREVIEW) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 setLayoutMode(SplitLayoutMode.PREVIEW_ONLY);
@@ -121,7 +130,10 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
 
         actionGroup.addSeparator();
 
-        actionGroup.add(new ToggleAction("Sync Scroll", "Synchronize editor and preview scroll position", PureDownIcons.SYNC) {
+        actionGroup.add(new ToggleAction(
+                com.puredown.i18n.PureDownI18n.message("同步滚动", "Sync Scroll"),
+                com.puredown.i18n.PureDownI18n.message("双向同步编辑与预览滚动条", "Synchronize editor and preview scroll position"),
+                PureDownIcons.SYNC) {
             @Override
             public boolean isSelected(@NotNull AnActionEvent e) {
                 return isSyncScrollEnabled;

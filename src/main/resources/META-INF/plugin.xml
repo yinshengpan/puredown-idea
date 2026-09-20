@@ -39,6 +39,8 @@
     </ul>
     ]]></change-notes>
 
+    <resource-bundle>messages.PureDownBundle</resource-bundle>
+
     <!-- Works on all IntelliJ Platform IDEs including IntelliJ IDEA and Android Studio -->
     <depends>com.intellij.modules.platform</depends>
 

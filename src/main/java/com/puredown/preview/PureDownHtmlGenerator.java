@@ -86,10 +86,12 @@ public final class PureDownHtmlGenerator {
                             .append("</div>\n");
                 } else {
                     String displayLang = lang.isEmpty() ? "text" : lang;
+                    String copyTitle = com.puredown.i18n.PureDownI18n.message("复制代码", "Copy code");
+                    String copyBtnText = com.puredown.i18n.PureDownI18n.message("📋 复制", "📋 Copy");
                     out.append("<div class=\"code-block-wrapper\" data-source-line=\"").append(startLine).append("\">\n")
                             .append("  <div class=\"code-header\">\n")
                             .append("    <span class=\"code-lang\">").append(escapeHtml(displayLang)).append("</span>\n")
-                            .append("    <button class=\"copy-button\" onclick=\"copyCode(this)\" title=\"复制代码\">📋 复制</button>\n")
+                            .append("    <button class=\"copy-button\" onclick=\"copyCode(this)\" title=\"").append(copyTitle).append("\">").append(copyBtnText).append("</button>\n")
                             .append("  </div>\n")
                             .append("  <pre><code class=\"language-").append(displayLang).append("\">")
                             .append(codeContent)
@@ -267,9 +269,10 @@ public final class PureDownHtmlGenerator {
 
         // If in-doc TOC placeholder exists, generate HTML TOC tree
         if (result.contains("<!--IN_DOC_TOC_PLACEHOLDER-->")) {
+            String tocTitle = com.puredown.i18n.PureDownI18n.message("📑 目录大纲", "📑 Table of Contents");
             StringBuilder tocBuilder = new StringBuilder();
             tocBuilder.append("<div class=\"in-doc-toc\">\n")
-                    .append("  <div class=\"in-doc-toc-title\">📑 目录大纲</div>\n")
+                    .append("  <div class=\"in-doc-toc-title\">").append(tocTitle).append("</div>\n")
                     .append("  <ul>\n");
             for (TocEntry entry : tocList) {
                 int indent = Math.max(0, (entry.level - 1) * 16);
@@ -435,7 +438,8 @@ public final class PureDownHtmlGenerator {
         while (imgMatcher.find()) {
             String alt = imgMatcher.group(1);
             String url = imgMatcher.group(2);
-            imgMatcher.appendReplacement(imgSb, "<img class=\"zoomable-img\" src=\"" + Matcher.quoteReplacement(url) + "\" alt=\"" + Matcher.quoteReplacement(alt) + "\" onclick=\"openLightbox(this)\" title=\"点击放大预览\" />");
+            String zoomTitle = com.puredown.i18n.PureDownI18n.message("点击放大预览", "Click to zoom preview");
+            imgMatcher.appendReplacement(imgSb, "<img class=\"zoomable-img\" src=\"" + Matcher.quoteReplacement(url) + "\" alt=\"" + Matcher.quoteReplacement(alt) + "\" onclick=\"openLightbox(this)\" title=\"" + zoomTitle + "\" />");
         }
         imgMatcher.appendTail(imgSb);
         s = imgSb.toString();

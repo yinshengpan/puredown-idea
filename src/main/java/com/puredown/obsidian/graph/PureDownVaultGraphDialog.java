@@ -21,7 +21,7 @@ public class PureDownVaultGraphDialog extends DialogWrapper {
         this.project = project;
         this.graphData = PureDownVaultGraphService.buildGraph(project);
         this.graphPanel = new PureDownVaultGraphPanel(project, graphData);
-        setTitle("PureDown Knowledge Vault Graph");
+        setTitle(com.puredown.i18n.PureDownI18n.message("PureDown 知识图谱 (Vault Graph)", "PureDown Knowledge Vault Graph"));
         init();
     }
 
@@ -32,7 +32,7 @@ public class PureDownVaultGraphDialog extends DialogWrapper {
 
         JPanel topBar = new JPanel(new BorderLayout());
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.add(new JBLabel("Search Notes: "));
+        searchPanel.add(new JBLabel(com.puredown.i18n.PureDownI18n.message("搜索笔记: ", "Search Notes: ")));
         JBTextField searchField = new JBTextField(20);
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -47,9 +47,10 @@ public class PureDownVaultGraphDialog extends DialogWrapper {
         });
         searchPanel.add(searchField);
 
-        JBLabel infoLabel = new JBLabel("Notes: " + graphData.getNodes().size() +
-                " | Links: " + graphData.getEdges().size() +
-                "  (Double-click node to open)");
+        JBLabel infoLabel = new JBLabel(com.puredown.i18n.PureDownI18n.message(
+                String.format("笔记数: %d | 关联数: %d  (双击节点打开)", graphData.getNodes().size(), graphData.getEdges().size()),
+                String.format("Notes: %d | Links: %d  (Double-click node to open)", graphData.getNodes().size(), graphData.getEdges().size())
+        ));
         infoLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 16));
 
         topBar.add(searchPanel, BorderLayout.WEST);
