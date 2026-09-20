@@ -55,6 +55,45 @@
         });
     };
 
+    window.executeCode = function(button) {
+        const codeWrapper = button.closest('.code-block-wrapper');
+        if (!codeWrapper) return;
+        const codeElem = codeWrapper.querySelector('pre code');
+        if (!codeElem) return;
+
+        const rawCode = codeElem.innerText.trim();
+        if (!rawCode) return;
+
+        const originalText = button.innerHTML;
+        const isEnglish = originalText.indexOf('Run') !== -1;
+        button.innerHTML = isEnglish ? '⏳ Running...' : '⏳ 执行中...';
+        button.disabled = true;
+
+        function resetBtn() {
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 1000);
+        }
+
+        if (window.pureDownBridge && window.pureDownBridge.executeCommand) {
+            window.pureDownBridge.executeCommand(rawCode);
+            resetBtn();
+        } else if (window.cefQuery) {
+            window.cefQuery({
+                request: 'executeCommand:' + encodeURIComponent(rawCode),
+                onSuccess: function() {
+                    resetBtn();
+                },
+                onFailure: function() {
+                    resetBtn();
+                }
+            });
+        } else {
+            resetBtn();
+        }
+    };
+
     window.updateContent = function(html) {
         const container = document.getElementById('puredown-content');
         if (!container) return;

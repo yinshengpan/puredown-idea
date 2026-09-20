@@ -166,6 +166,12 @@ public class PureDownJBCefPreview implements Disposable {
             if (!targetNote.isEmpty()) {
                 PureDownWikiLinkResolver.openNote(project, targetNote);
             }
+        } else if (request.startsWith("executeCommand:")) {
+            String encoded = request.substring("executeCommand:".length()).trim();
+            try {
+                String cmd = java.net.URLDecoder.decode(encoded, StandardCharsets.UTF_8);
+                com.puredown.runner.PureDownCommandRunner.runCommand(project, cmd);
+            } catch (Exception ignored) {}
         }
     }
 

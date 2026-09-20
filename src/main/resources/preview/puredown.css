@@ -155,6 +155,36 @@ body.theme-dark .code-header {
     text-transform: uppercase;
 }
 
+.code-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.run-button {
+    background: rgba(46, 125, 50, 0.1);
+    border: 1px solid rgba(46, 125, 50, 0.35);
+    color: #2e7d32;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+body.theme-dark .run-button {
+    background: rgba(76, 175, 80, 0.15);
+    border-color: rgba(76, 175, 80, 0.4);
+    color: #4caf50;
+}
+.run-button:hover {
+    background: rgba(46, 125, 50, 0.25);
+    border-color: #2e7d32;
+}
+
 .copy-button {
     background: transparent;
     border: 1px solid var(--pd-border);
@@ -196,20 +226,22 @@ blockquote {
     border-left: 0.25em solid var(--pd-quote-border);
 }
 
-/* Tables */
+/* Tables (Markdown & Raw HTML) */
 table {
     border-spacing: 0;
     border-collapse: collapse;
-    margin-top: 0;
-    margin-bottom: 16px;
+    margin-top: 14px;
+    margin-bottom: 20px;
     width: 100%;
-    overflow: auto;
-    display: block;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 table th, table td {
-    padding: 8px 14px;
+    padding: 10px 14px;
     border: 1px solid var(--pd-table-border);
+    vertical-align: top;
+    line-height: 1.5;
 }
 
 table th {

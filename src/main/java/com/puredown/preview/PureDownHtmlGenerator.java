@@ -18,6 +18,11 @@ public final class PureDownHtmlGenerator {
     private static final Pattern MATH_INLINE_PATTERN = Pattern.compile("\\$([^\\$]+)\\$");
     private static final Pattern CALLOUT_START_PATTERN = Pattern.compile("^>\\s*\\[!([a-zA-Z_-]+)\\](?:\\s+(.*))?$");
     private static final Pattern TOC_PATTERN = Pattern.compile("^\\[\\[?TOC\\]?\\]$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern HTML_BLOCK_PATTERN = Pattern.compile(
+            "^</?(?:table|thead|tbody|tfoot|tr|th|td|div|p|blockquote|pre|details|summary|section|article|header|footer|nav|ul|ol|li|figure|figcaption|h[1-6]|span|b|i|u|s|strong|em|kbd|mark|sub|sup|br|hr|img|a|code|input|form|select|option|button|font|center)(?:\\s+[^>]*)?/?>.*$",
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final Pattern INLINE_HTML_TAG = Pattern.compile("</?[a-zA-Z][a-zA-Z0-9]*(?:\\s+[^<>]*)?/?>");
 
     private PureDownHtmlGenerator() {}
 
@@ -40,6 +45,7 @@ public final class PureDownHtmlGenerator {
         List<TocEntry> tocList = new ArrayList<>();
 
         int i = 0;
+        boolean inHtmlTable = false;
 
         // 0. YAML Front Matter Parser (if starts at line 0 with ---)
         if (rawLines.length > 0 && rawLines[0].trim().equals("---")) {
@@ -60,6 +66,13 @@ public final class PureDownHtmlGenerator {
             String line = rawLines[i];
             String trimmed = line.trim();
 
+            // Auto-close unclosed HTML table if a block boundary is encountered
+            if (inHtmlTable && (trimmed.startsWith("```") || trimmed.startsWith("#") ||
+                    trimmed.matches("^(-{3,}|\\*{3,}|_{3,})$") || trimmed.startsWith("> [!"))) {
+                out.append("</table>\n");
+                inHtmlTable = false;
+            }
+
             // 1. [TOC] marker
             if (TOC_PATTERN.matcher(trimmed).matches()) {
                 out.append("<!--IN_DOC_TOC_PLACEHOLDER-->\n");
@@ -79,19 +92,34 @@ public final class PureDownHtmlGenerator {
                 }
                 if (i < rawLines.length) i++; // skip closing fence
 
-                String codeContent = escapeHtml(String.join("\n", codeLines));
+                String rawCode = String.join("\n", codeLines);
+                String codeContent = escapeHtml(rawCode);
                 if ("mermaid".equals(lang)) {
                     out.append("<div class=\"mermaid\" data-source-line=\"").append(startLine).append("\">")
                             .append(codeContent)
                             .append("</div>\n");
                 } else {
                     String displayLang = lang.isEmpty() ? "text" : lang;
+                    boolean isExecutable = isExecutableCommand(lang, rawCode);
+
                     String copyTitle = com.puredown.i18n.PureDownI18n.message("复制代码", "Copy code");
                     String copyBtnText = com.puredown.i18n.PureDownI18n.message("📋 复制", "📋 Copy");
+                    String runTitle = com.puredown.i18n.PureDownI18n.message("快速执行命令", "Quick Run command");
+                    String runBtnText = com.puredown.i18n.PureDownI18n.message("▶️ 执行", "▶️ Run");
+
                     out.append("<div class=\"code-block-wrapper\" data-source-line=\"").append(startLine).append("\">\n")
                             .append("  <div class=\"code-header\">\n")
                             .append("    <span class=\"code-lang\">").append(escapeHtml(displayLang)).append("</span>\n")
-                            .append("    <button class=\"copy-button\" onclick=\"copyCode(this)\" title=\"").append(copyTitle).append("\">").append(copyBtnText).append("</button>\n")
+                            .append("    <div class=\"code-actions\">\n");
+
+                    if (isExecutable) {
+                        out.append("      <button class=\"run-button\" onclick=\"executeCode(this)\" title=\"")
+                                .append(runTitle).append("\">").append(runBtnText).append("</button>\n");
+                    }
+
+                    out.append("      <button class=\"copy-button\" onclick=\"copyCode(this)\" title=\"")
+                            .append(copyTitle).append("\">").append(copyBtnText).append("</button>\n")
+                            .append("    </div>\n")
                             .append("  </div>\n")
                             .append("  <pre><code class=\"language-").append(displayLang).append("\">")
                             .append(codeContent)
@@ -183,7 +211,7 @@ public final class PureDownHtmlGenerator {
                 }
             }
 
-            // 6. Tables
+            // 6. Markdown Pipe Tables
             if (PureDownTableParser.isTableLine(trimmed)) {
                 List<LineEntry> tableLines = new ArrayList<>();
                 while (i < rawLines.length && PureDownTableParser.isTableLine(rawLines[i].trim())) {
@@ -200,6 +228,21 @@ public final class PureDownHtmlGenerator {
                             .append(formatInline(single.text)).append("</p>\n");
                     continue;
                 }
+            }
+
+            // 6.5 Raw HTML tables and HTML block elements
+            String lower = trimmed.toLowerCase();
+            if (lower.startsWith("<table") || lower.startsWith("<thead") || lower.startsWith("<tbody")) {
+                inHtmlTable = true;
+            }
+            if (lower.contains("</table>")) {
+                inHtmlTable = false;
+            }
+
+            if (inHtmlTable || HTML_BLOCK_PATTERN.matcher(trimmed).matches()) {
+                out.append(formatInline(line)).append("\n");
+                i++;
+                continue;
             }
 
             // 7. Horizontal Rule
@@ -265,6 +308,10 @@ public final class PureDownHtmlGenerator {
             i++;
         }
 
+        if (inHtmlTable) {
+            out.append("</table>\n");
+        }
+
         String result = out.toString();
 
         // If in-doc TOC placeholder exists, generate HTML TOC tree
@@ -286,6 +333,28 @@ public final class PureDownHtmlGenerator {
         }
 
         return result;
+    }
+
+    private static boolean isExecutableCommand(String lang, String rawCode) {
+        if (lang == null) lang = "";
+        String l = lang.trim().toLowerCase();
+        if (l.equals("bash") || l.equals("sh") || l.equals("shell") ||
+                l.equals("zsh") || l.equals("curl") || l.equals("cmd") ||
+                l.equals("powershell") || l.equals("terminal")) {
+            return true;
+        }
+        if (rawCode != null) {
+            String trimmed = rawCode.trim();
+            if (trimmed.startsWith("curl ") || trimmed.startsWith("curl\n") ||
+                    trimmed.startsWith("http ") || trimmed.startsWith("wget ") ||
+                    trimmed.startsWith("./") || trimmed.startsWith("git ") ||
+                    trimmed.startsWith("docker ") || trimmed.startsWith("npm ") ||
+                    trimmed.startsWith("yarn ") || trimmed.startsWith("pnpm ") ||
+                    trimmed.startsWith("gradlew ") || trimmed.startsWith("./gradlew")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void renderFrontMatter(String[] rawLines, int start, int end, StringBuilder out) {
@@ -420,7 +489,20 @@ public final class PureDownHtmlGenerator {
     }
 
     public static String formatInline(String text) {
-        String s = escapeHtml(text);
+        if (text == null) return "";
+
+        List<String> htmlTags = new ArrayList<>();
+        Matcher tagMatcher = INLINE_HTML_TAG.matcher(text);
+        StringBuilder tokenizedSb = new StringBuilder();
+        while (tagMatcher.find()) {
+            int tagIdx = htmlTags.size();
+            htmlTags.add(tagMatcher.group(0));
+            tagMatcher.appendReplacement(tokenizedSb, "\uE000" + tagIdx + "\uE001");
+        }
+        tagMatcher.appendTail(tokenizedSb);
+        String s = tokenizedSb.toString();
+
+        s = escapeHtml(s);
 
         // Math inline: $formula$
         Matcher mathMatcher = MATH_INLINE_PATTERN.matcher(s);
@@ -469,13 +551,13 @@ public final class PureDownHtmlGenerator {
         s = linkSb.toString();
 
         // Tags: #tag
-        Matcher tagMatcher = TAG_PATTERN.matcher(s);
+        Matcher tagPattMatcher = TAG_PATTERN.matcher(s);
         StringBuilder tagSb = new StringBuilder();
-        while (tagMatcher.find()) {
-            String tag = tagMatcher.group(1);
-            tagMatcher.appendReplacement(tagSb, "<span class=\"markdown-tag\">#" + Matcher.quoteReplacement(tag) + "</span>");
+        while (tagPattMatcher.find()) {
+            String tag = tagPattMatcher.group(1);
+            tagPattMatcher.appendReplacement(tagSb, "<span class=\"markdown-tag\">#" + Matcher.quoteReplacement(tag) + "</span>");
         }
-        tagMatcher.appendTail(tagSb);
+        tagPattMatcher.appendTail(tagSb);
         s = tagSb.toString();
 
         // Code: `code`
@@ -517,6 +599,11 @@ public final class PureDownHtmlGenerator {
         }
         strikeMatcher.appendTail(strikeSb);
         s = strikeSb.toString();
+
+        // Restore preserved HTML tags
+        for (int idx = 0; idx < htmlTags.size(); idx++) {
+            s = s.replace("\uE000" + idx + "\uE001", htmlTags.get(idx));
+        }
 
         return s;
     }
