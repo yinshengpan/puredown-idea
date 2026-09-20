@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PureDown Preview</title>
+  <link rel="stylesheet" href="vendor/katex.min.css">
+  <link rel="stylesheet" href="vendor/github.min.css">
   <link rel="stylesheet" href="puredown.css">
   <style>
     /* Inline base styles */
     #puredown-content {
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto;
     }
   </style>
@@ -17,6 +19,9 @@
   <div id="puredown-content">
     <p style="color: #888;">Rendering markdown...</p>
   </div>
+  <script src="vendor/katex.min.js"></script>
+  <script src="vendor/highlight.min.js"></script>
+  <script src="vendor/mermaid.min.js"></script>
   <script src="puredown.js"></script>
 </body>
 </html>

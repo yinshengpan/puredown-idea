@@ -117,21 +117,43 @@
         // Initialize Mermaid diagrams if any
         if (window.mermaid) {
             try {
-                mermaid.init(undefined, container.querySelectorAll('.mermaid'));
+                const isDark = document.body.classList.contains('theme-dark');
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: isDark ? 'dark' : 'default',
+                    securityLevel: 'loose'
+                });
+                const mermaidNodes = container.querySelectorAll('.mermaid');
+                if (mermaidNodes.length > 0) {
+                    if (typeof mermaid.run === 'function') {
+                        mermaid.run({ nodes: mermaidNodes });
+                    } else if (typeof mermaid.init === 'function') {
+                        mermaid.init(undefined, mermaidNodes);
+                    }
+                }
             } catch (e) {
                 console.warn('Mermaid rendering error:', e);
             }
         }
 
         // Initialize KaTeX math formulas if available
-        if (window.renderMathInElement) {
+        if (window.katex) {
             try {
-                renderMathInElement(container, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false}
-                    ],
-                    throwOnError: false
+                container.querySelectorAll('.katex-display').forEach(function(el) {
+                    const formula = el.getAttribute('data-math') || el.textContent.replace(/^\$\$|\$\$$/g, '').trim();
+                    try {
+                        el.innerHTML = katex.renderToString(formula, { displayMode: true, throwOnError: false });
+                    } catch (err) {
+                        console.warn('KaTeX display error:', err);
+                    }
+                });
+                container.querySelectorAll('.katex-inline').forEach(function(el) {
+                    const formula = el.getAttribute('data-math') || el.textContent.replace(/^\$|\$$/g, '').trim();
+                    try {
+                        el.innerHTML = katex.renderToString(formula, { displayMode: false, throwOnError: false });
+                    } catch (err) {
+                        console.warn('KaTeX inline error:', err);
+                    }
                 });
             } catch (e) {
                 console.warn('KaTeX rendering error:', e);
@@ -205,6 +227,24 @@
                     onSuccess: function() {},
                     onFailure: function() {}
                 });
+            }
+            return;
+        }
+
+        // Handle internal anchors (Footnotes, TOC, etc.)
+        const anchor = target.closest('a[href^="#"]');
+        if (anchor) {
+            const href = anchor.getAttribute('href');
+            if (href && href.length > 1) {
+                const targetId = href.substring(1);
+                const targetElem = document.getElementById(targetId) || document.querySelector(href);
+                if (targetElem) {
+                    e.preventDefault();
+                    targetElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetElem.classList.remove('target-flash');
+                    void targetElem.offsetWidth; // trigger reflow
+                    targetElem.classList.add('target-flash');
+                }
             }
         }
     });

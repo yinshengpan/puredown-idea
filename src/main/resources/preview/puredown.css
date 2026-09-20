@@ -450,19 +450,116 @@ body.theme-dark .front-matter-tag {
     background-color: rgba(117, 117, 117, 0.08);
 }
 
-/* Mermaid Diagrams */
-.mermaid {
-    text-align: center;
-    margin: 16px 0;
-    background: transparent;
+/* Mark / Highlight */
+mark, .markdown-highlight {
+    background-color: #fff3a8;
+    color: #24292f;
+    padding: 0.15em 0.35em;
+    border-radius: 3px;
+}
+body.theme-dark mark, body.theme-dark .markdown-highlight {
+    background-color: #634d00;
+    color: #f0f6fc;
 }
 
-/* Math equations */
+/* Subscript & Superscript */
+sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+sup {
+    top: -0.5em;
+}
+sub {
+    bottom: -0.25em;
+}
+
+/* Footnotes */
+.footnote-ref {
+    font-size: 0.75em;
+    vertical-align: super;
+    margin-left: 2px;
+    font-weight: 600;
+}
+.footnote-ref a {
+    text-decoration: none;
+    color: var(--pd-link);
+}
+.footnotes-section {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--pd-border);
+    font-size: 0.9em;
+    color: var(--pd-muted);
+}
+.footnotes-section h4 {
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    font-size: 1.1em;
+    color: var(--pd-fg);
+}
+.footnotes-section ol {
+    padding-left: 1.5em;
+    margin-bottom: 0;
+}
+.footnotes-section li {
+    margin-bottom: 0.6em;
+    line-height: 1.5;
+}
+.footnote-backref {
+    font-family: var(--pd-font-mono);
+    margin-left: 6px;
+    text-decoration: none;
+    color: var(--pd-link);
+    font-weight: bold;
+}
+
+/* Mermaid Diagrams */
+.mermaid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1.5rem 0;
+    padding: 1.2rem;
+    background-color: rgba(128, 128, 128, 0.04);
+    border-radius: 8px;
+    border: 1px solid var(--pd-border);
+    overflow-x: auto;
+}
+.mermaid svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Math equations (KaTeX) */
 .katex-display {
-    margin: 1em 0;
+    margin: 1.2rem 0;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 8px 0;
+    padding: 0.5rem 0;
+    text-align: center;
+}
+.katex-inline {
+    display: inline-block;
+    vertical-align: middle;
+}
+.katex-error {
+    color: #cf222e;
+    font-family: var(--pd-font-mono);
+    background: rgba(207, 34, 46, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Anchor highlight flash on jump */
+:target, .target-flash {
+    animation: flash-highlight 1.5s ease-out;
+}
+@keyframes flash-highlight {
+    0% { background-color: rgba(68, 147, 248, 0.35); }
+    100% { background-color: transparent; }
 }
 
 /* Source Line Anchor Mapping */

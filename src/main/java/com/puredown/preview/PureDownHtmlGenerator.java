@@ -2,7 +2,9 @@ package com.puredown.preview;
 
 import com.puredown.table.PureDownTableParser;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,8 +16,13 @@ public final class PureDownHtmlGenerator {
     private static final Pattern BOLD_PATTERN = Pattern.compile("(\\*\\*|__)(.*?)\\1");
     private static final Pattern ITALIC_PATTERN = Pattern.compile("(?<!\\*)(\\*|_)(.*?)\\1(?!\\*)");
     private static final Pattern STRIKE_PATTERN = Pattern.compile("~~(.*?)~~");
+    private static final Pattern MARK_PATTERN = Pattern.compile("==([^=\\n]+?)==;".replace(";", ""));
+    private static final Pattern SUB_PATTERN = Pattern.compile("(?<!~)~([^\\s~]+?)~(?!~)");
+    private static final Pattern SUP_PATTERN = Pattern.compile("(?<!\\^)\\^([^\\s\\^]+?)\\^(?!\\^)");
+    private static final Pattern FOOTNOTE_REF_PATTERN = Pattern.compile("\\[\\^([a-zA-Z0-9_-]+)\\]");
+    private static final Pattern FOOTNOTE_DEF_PATTERN = Pattern.compile("^\\[\\^([a-zA-Z0-9_-]+)\\]:\\s*(.*)$");
     private static final Pattern CODE_PATTERN = Pattern.compile("`([^`]+)`");
-    private static final Pattern MATH_INLINE_PATTERN = Pattern.compile("\\$([^\\$]+)\\$");
+    private static final Pattern MATH_INLINE_PATTERN = Pattern.compile("(^|[^\\\\$])\\$([^\\s\\$](?:[^\\$]*?[^\\s\\$])?)\\$");
     private static final Pattern CALLOUT_START_PATTERN = Pattern.compile("^>\\s*\\[!([a-zA-Z_-]+)\\](?:\\s+(.*))?$");
     private static final Pattern TOC_PATTERN = Pattern.compile("^\\[\\[?TOC\\]?\\]$", Pattern.CASE_INSENSITIVE);
     private static final Pattern HTML_BLOCK_PATTERN = Pattern.compile(
@@ -43,6 +50,7 @@ public final class PureDownHtmlGenerator {
         String[] rawLines = markdown.split("\n", -1);
         StringBuilder out = new StringBuilder();
         List<TocEntry> tocList = new ArrayList<>();
+        Map<String, String> footnotes = new LinkedHashMap<>();
 
         int i = 0;
         boolean inHtmlTable = false;
@@ -77,6 +85,23 @@ public final class PureDownHtmlGenerator {
             if (TOC_PATTERN.matcher(trimmed).matches()) {
                 out.append("<!--IN_DOC_TOC_PLACEHOLDER-->\n");
                 i++;
+                continue;
+            }
+
+            // 1.5 Footnote definitions: [^id]: ...
+            Matcher fnDefMatch = FOOTNOTE_DEF_PATTERN.matcher(trimmed);
+            if (fnDefMatch.matches()) {
+                String fnId = fnDefMatch.group(1);
+                StringBuilder fnContent = new StringBuilder(fnDefMatch.group(2).trim());
+                i++;
+                while (i < rawLines.length && (rawLines[i].startsWith("    ") || rawLines[i].startsWith("\t") ||
+                        (!rawLines[i].trim().isEmpty() && !rawLines[i].trim().startsWith("[^") && !rawLines[i].trim().startsWith("#")))) {
+                    if (!rawLines[i].trim().isEmpty()) {
+                        fnContent.append(" ").append(rawLines[i].trim());
+                    }
+                    i++;
+                }
+                footnotes.put(fnId, fnContent.toString());
                 continue;
             }
 
@@ -118,7 +143,7 @@ public final class PureDownHtmlGenerator {
                     }
 
                     out.append("      <button class=\"copy-button\" onclick=\"copyCode(this)\" title=\"")
-                            .append(copyTitle).append("\">").append(copyBtnText).append("</button>\n")
+                                .append(copyTitle).append("\">").append(copyBtnText).append("</button>\n")
                             .append("    </div>\n")
                             .append("  </div>\n")
                             .append("  <pre><code class=\"language-").append(displayLang).append("\">")
@@ -133,8 +158,9 @@ public final class PureDownHtmlGenerator {
             if (trimmed.equals("$$") || (trimmed.startsWith("$$") && trimmed.endsWith("$$") && trimmed.length() > 2)) {
                 if (trimmed.startsWith("$$") && trimmed.endsWith("$$") && trimmed.length() > 2) {
                     String math = trimmed.substring(2, trimmed.length() - 2).trim();
-                    out.append("<div class=\"katex-display\" data-source-line=\"").append(i).append("\">$$")
-                            .append(math).append("$$</div>\n");
+                    out.append("<div class=\"katex-display\" data-math=\"").append(escapeHtml(math))
+                            .append("\" data-source-line=\"").append(i).append("\">$$")
+                            .append(escapeHtml(math)).append("$$</div>\n");
                     i++;
                     continue;
                 }
@@ -146,8 +172,10 @@ public final class PureDownHtmlGenerator {
                     i++;
                 }
                 if (i < rawLines.length) i++;
-                out.append("<div class=\"katex-display\" data-source-line=\"").append(startLine).append("\">$$\n")
-                        .append(escapeHtml(String.join("\n", mathLines)))
+                String formula = String.join("\n", mathLines).trim();
+                out.append("<div class=\"katex-display\" data-math=\"").append(escapeHtml(formula))
+                        .append("\" data-source-line=\"").append(startLine).append("\">$$\n")
+                        .append(escapeHtml(formula))
                         .append("\n$$</div>\n");
                 continue;
             }
@@ -310,6 +338,24 @@ public final class PureDownHtmlGenerator {
 
         if (inHtmlTable) {
             out.append("</table>\n");
+        }
+
+        // Render Footnotes section if any
+        if (!footnotes.isEmpty()) {
+            String sectionTitle = com.puredown.i18n.PureDownI18n.message("参考脚注", "Footnotes");
+            String backrefTitle = com.puredown.i18n.PureDownI18n.message("返回原文", "Jump back");
+            out.append("<div class=\"footnotes-section\">\n");
+            out.append("  <h4>").append(sectionTitle).append("</h4>\n");
+            out.append("  <ol>\n");
+            for (Map.Entry<String, String> entry : footnotes.entrySet()) {
+                String id = entry.getKey();
+                String content = formatInline(entry.getValue());
+                out.append("    <li id=\"fn-").append(id).append("\">")
+                        .append(content)
+                        .append(" <a href=\"#fnref-").append(id).append("\" class=\"footnote-backref\" title=\"")
+                        .append(backrefTitle).append("\">↩</a></li>\n");
+            }
+            out.append("  </ol>\n</div>\n");
         }
 
         String result = out.toString();
@@ -491,8 +537,35 @@ public final class PureDownHtmlGenerator {
     public static String formatInline(String text) {
         if (text == null) return "";
 
+        // 1. Protect inline code `...`
+        List<String> codeSnippets = new ArrayList<>();
+        Matcher codeMatcher = CODE_PATTERN.matcher(text);
+        StringBuilder codeSb = new StringBuilder();
+        while (codeMatcher.find()) {
+            int codeIdx = codeSnippets.size();
+            codeSnippets.add("<code>" + escapeHtml(codeMatcher.group(1)) + "</code>");
+            codeMatcher.appendReplacement(codeSb, "\uE002" + codeIdx + "\uE003");
+        }
+        codeMatcher.appendTail(codeSb);
+        String s = codeSb.toString();
+
+        // 2. Protect inline math: $formula$
+        List<String> mathFormulas = new ArrayList<>();
+        Matcher mathMatcher = MATH_INLINE_PATTERN.matcher(s);
+        StringBuilder mathTokenSb = new StringBuilder();
+        while (mathMatcher.find()) {
+            String prefix = mathMatcher.group(1);
+            String formula = mathMatcher.group(2);
+            int mathIdx = mathFormulas.size();
+            mathFormulas.add(formula);
+            mathMatcher.appendReplacement(mathTokenSb, Matcher.quoteReplacement(prefix) + "\uE006" + mathIdx + "\uE007");
+        }
+        mathMatcher.appendTail(mathTokenSb);
+        s = mathTokenSb.toString();
+
+        // 3. Protect HTML tags
         List<String> htmlTags = new ArrayList<>();
-        Matcher tagMatcher = INLINE_HTML_TAG.matcher(text);
+        Matcher tagMatcher = INLINE_HTML_TAG.matcher(s);
         StringBuilder tokenizedSb = new StringBuilder();
         while (tagMatcher.find()) {
             int tagIdx = htmlTags.size();
@@ -500,21 +573,11 @@ public final class PureDownHtmlGenerator {
             tagMatcher.appendReplacement(tokenizedSb, "\uE000" + tagIdx + "\uE001");
         }
         tagMatcher.appendTail(tokenizedSb);
-        String s = tokenizedSb.toString();
+        s = tokenizedSb.toString();
 
         s = escapeHtml(s);
 
-        // Math inline: $formula$
-        Matcher mathMatcher = MATH_INLINE_PATTERN.matcher(s);
-        StringBuilder mathSb = new StringBuilder();
-        while (mathMatcher.find()) {
-            String formula = mathMatcher.group(1);
-            mathMatcher.appendReplacement(mathSb, "<span class=\"katex-inline\">\\$" + Matcher.quoteReplacement(formula) + "\\$</span>");
-        }
-        mathMatcher.appendTail(mathSb);
-        s = mathSb.toString();
-
-        // Images: ![alt](url) -> Clickable Lightbox images!
+        // 4. Images: ![alt](url) -> Clickable Lightbox images!
         Matcher imgMatcher = IMAGE_PATTERN.matcher(s);
         StringBuilder imgSb = new StringBuilder();
         while (imgMatcher.find()) {
@@ -526,7 +589,19 @@ public final class PureDownHtmlGenerator {
         imgMatcher.appendTail(imgSb);
         s = imgSb.toString();
 
-        // WikiLinks: [[Target|Alias]] or [[Target]]
+        // 5. Footnote references: [^id]
+        Matcher fnRefMatcher = FOOTNOTE_REF_PATTERN.matcher(s);
+        StringBuilder fnRefSb = new StringBuilder();
+        while (fnRefMatcher.find()) {
+            String fnId = fnRefMatcher.group(1);
+            fnRefMatcher.appendReplacement(fnRefSb, "<sup class=\"footnote-ref\"><a href=\"#fn-" +
+                    Matcher.quoteReplacement(fnId) + "\" id=\"fnref-" + Matcher.quoteReplacement(fnId) + "\">[" +
+                    Matcher.quoteReplacement(fnId) + "]</a></sup>");
+        }
+        fnRefMatcher.appendTail(fnRefSb);
+        s = fnRefSb.toString();
+
+        // 6. WikiLinks: [[Target|Alias]] or [[Target]]
         Matcher wikiMatcher = WIKILINK_PATTERN.matcher(s);
         StringBuilder wikiSb = new StringBuilder();
         while (wikiMatcher.find()) {
@@ -539,7 +614,7 @@ public final class PureDownHtmlGenerator {
         wikiMatcher.appendTail(wikiSb);
         s = wikiSb.toString();
 
-        // Standard Links: [text](url)
+        // 7. Standard Links: [text](url)
         Matcher linkMatcher = LINK_PATTERN.matcher(s);
         StringBuilder linkSb = new StringBuilder();
         while (linkMatcher.find()) {
@@ -550,7 +625,7 @@ public final class PureDownHtmlGenerator {
         linkMatcher.appendTail(linkSb);
         s = linkSb.toString();
 
-        // Tags: #tag
+        // 8. Tags: #tag
         Matcher tagPattMatcher = TAG_PATTERN.matcher(s);
         StringBuilder tagSb = new StringBuilder();
         while (tagPattMatcher.find()) {
@@ -560,17 +635,17 @@ public final class PureDownHtmlGenerator {
         tagPattMatcher.appendTail(tagSb);
         s = tagSb.toString();
 
-        // Code: `code`
-        Matcher codeMatcher = CODE_PATTERN.matcher(s);
-        StringBuilder codeSb = new StringBuilder();
-        while (codeMatcher.find()) {
-            String code = codeMatcher.group(1);
-            codeMatcher.appendReplacement(codeSb, "<code>" + Matcher.quoteReplacement(code) + "</code>");
+        // 9. Mark / Highlight: ==text==
+        Matcher markMatcher = MARK_PATTERN.matcher(s);
+        StringBuilder markSb = new StringBuilder();
+        while (markMatcher.find()) {
+            String mText = markMatcher.group(1);
+            markMatcher.appendReplacement(markSb, "<mark class=\"markdown-highlight\">" + Matcher.quoteReplacement(mText) + "</mark>");
         }
-        codeMatcher.appendTail(codeSb);
-        s = codeSb.toString();
+        markMatcher.appendTail(markSb);
+        s = markSb.toString();
 
-        // Bold: **text**
+        // 10. Bold: **text**
         Matcher boldMatcher = BOLD_PATTERN.matcher(s);
         StringBuilder boldSb = new StringBuilder();
         while (boldMatcher.find()) {
@@ -580,7 +655,7 @@ public final class PureDownHtmlGenerator {
         boldMatcher.appendTail(boldSb);
         s = boldSb.toString();
 
-        // Italic: *text*
+        // 11. Italic: *text*
         Matcher italicMatcher = ITALIC_PATTERN.matcher(s);
         StringBuilder italicSb = new StringBuilder();
         while (italicMatcher.find()) {
@@ -590,7 +665,7 @@ public final class PureDownHtmlGenerator {
         italicMatcher.appendTail(italicSb);
         s = italicSb.toString();
 
-        // Strike: ~~text~~
+        // 12. Strikethrough: ~~text~~
         Matcher strikeMatcher = STRIKE_PATTERN.matcher(s);
         StringBuilder strikeSb = new StringBuilder();
         while (strikeMatcher.find()) {
@@ -600,9 +675,41 @@ public final class PureDownHtmlGenerator {
         strikeMatcher.appendTail(strikeSb);
         s = strikeSb.toString();
 
+        // 13. Subscript: ~text~ (e.g. H~2~O)
+        Matcher subMatcher = SUB_PATTERN.matcher(s);
+        StringBuilder subSb = new StringBuilder();
+        while (subMatcher.find()) {
+            String subText = subMatcher.group(1);
+            subMatcher.appendReplacement(subSb, "<sub>" + Matcher.quoteReplacement(subText) + "</sub>");
+        }
+        subMatcher.appendTail(subSb);
+        s = subSb.toString();
+
+        // 14. Superscript: ^text^ (e.g. n^2^)
+        Matcher supMatcher = SUP_PATTERN.matcher(s);
+        StringBuilder supSb = new StringBuilder();
+        while (supMatcher.find()) {
+            String supText = supMatcher.group(1);
+            supMatcher.appendReplacement(supSb, "<sup>" + Matcher.quoteReplacement(supText) + "</sup>");
+        }
+        supMatcher.appendTail(supSb);
+        s = supSb.toString();
+
+        // Restore math inline formulas
+        for (int idx = 0; idx < mathFormulas.size(); idx++) {
+            String formula = mathFormulas.get(idx);
+            s = s.replace("\uE006" + idx + "\uE007", "<span class=\"katex-inline\" data-math=\"" +
+                    escapeHtml(formula) + "\">$" + escapeHtml(formula) + "$</span>");
+        }
+
         // Restore preserved HTML tags
         for (int idx = 0; idx < htmlTags.size(); idx++) {
             s = s.replace("\uE000" + idx + "\uE001", htmlTags.get(idx));
+        }
+
+        // Restore protected inline code
+        for (int idx = 0; idx < codeSnippets.size(); idx++) {
+            s = s.replace("\uE002" + idx + "\uE003", codeSnippets.get(idx));
         }
 
         return s;

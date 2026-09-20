@@ -15,6 +15,7 @@ import org.cef.handler.CefLoadHandlerAdapter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -87,12 +88,20 @@ public class PureDownJBCefPreview implements Disposable {
     }
 
     private void loadTemplate(JBCefBrowser browser) {
+        File indexFile = PureDownPreviewAssets.getIndexHtmlFile();
+        if (indexFile != null && indexFile.exists()) {
+            browser.loadURL(indexFile.toURI().toString());
+            return;
+        }
+
+        // Fallback in-memory HTML if extraction failed
         String html = readResource("/preview/index.html");
         String css = readResource("/preview/puredown.css");
         String katexCss = readResource("/preview/vendor/katex.min.css");
         String ghCss = readResource("/preview/vendor/github.min.css");
         String katexJs = readResource("/preview/vendor/katex.min.js");
         String hlJs = readResource("/preview/vendor/highlight.min.js");
+        String mermaidJs = readResource("/preview/vendor/mermaid.min.js");
         String js = readResource("/preview/puredown.js");
 
         StringBuilder fullCss = new StringBuilder();
@@ -103,9 +112,15 @@ public class PureDownJBCefPreview implements Disposable {
         StringBuilder fullJs = new StringBuilder();
         if (!katexJs.isEmpty()) fullJs.append(katexJs).append("\n");
         if (!hlJs.isEmpty()) fullJs.append(hlJs).append("\n");
+        if (!mermaidJs.isEmpty()) fullJs.append(mermaidJs).append("\n");
         if (!js.isEmpty()) fullJs.append(js).append("\n");
 
-        String fullHtml = html.replace("<link rel=\"stylesheet\" href=\"puredown.css\">", "<style>" + fullCss + "</style>")
+        String fullHtml = html.replace("<link rel=\"stylesheet\" href=\"vendor/katex.min.css\">", "")
+                .replace("<link rel=\"stylesheet\" href=\"vendor/github.min.css\">", "")
+                .replace("<link rel=\"stylesheet\" href=\"puredown.css\">", "<style>" + fullCss + "</style>")
+                .replace("<script src=\"vendor/katex.min.js\"></script>", "")
+                .replace("<script src=\"vendor/highlight.min.js\"></script>", "")
+                .replace("<script src=\"vendor/mermaid.min.js\"></script>", "")
                 .replace("<script src=\"puredown.js\"></script>", "<script>" + fullJs + "</script>");
 
         browser.loadHTML(fullHtml);
