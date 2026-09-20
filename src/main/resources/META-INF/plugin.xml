@@ -5,11 +5,12 @@
 
     <description><![CDATA[
     <h3>PureDown - Modern Markdown & Obsidian-Grade Knowledge Workspace for IntelliJ IDEA & Android Studio</h3>
-    <p>PureDown blends the essential editing power of the official Markdown plugin with the advanced superpowers of Markdown Pro:</p>
+    <p>PureDown is a high-performance Markdown editing, rendering, and knowledge management plugin designed for modern technical writing and documentation:</p>
     <ul>
-        <li><b>Seamless In-Place Split Editor:</b> High-performance bidirectional synchronized scrolling with 3 layout modes (Editor Only, Split, Preview Only).</li>
+        <li><b>Seamless In-Place Split Editor:</b> High-performance bidirectional synchronized scrolling with 3 layout modes (Split Mode, Editor Only, Preview Only). Customizable default view mode in Settings.</li>
         <li><b>Floating Formatting Toolbar:</b> Format selections instantly (Bold, Italic, Strikethrough, Code, Quote, Links, Task lists).</li>
-        <li><b>Full-Featured Table Editor & Formatter:</b> In-place Markdown table alignment with CJK fullwidth support, automatic column padding, row/column insertion, and quick formatting.</li>
+        <li><b>Full-Featured CJK Table Formatter:</b> In-place Markdown table alignment with CJK fullwidth support, automatic column padding, and quick template insertion.</li>
+        <li><b>Live Document Statistics Bar:</b> Status bar showing cursor position (Ln, Col), character count, word count, line count, and estimated reading time.</li>
         <li><b>Smart Task Lists & Ordered Lists:</b> One-click interactive checkbox toggle (<code>- [ ]</code> &harr; <code>- [x]</code>) in both preview and editor, plus auto-renumbering of sequential lists.</li>
         <li><b>Obsidian Vault & Knowledge Base Power:</b>
             <ul>
@@ -18,9 +19,10 @@
                 <li>Interactive 2D <b>Knowledge Vault Graph</b> showing note connection nodes, physics layout, and search.</li>
             </ul>
         </li>
-        <li><b>Rich Preview:</b> Math / LaTeX formulas (KaTeX), Mermaid diagrams, syntax-highlighted code blocks, dark/light theme auto-adaptation.</li>
+        <li><b>Rich Preview & Technical Writing Extensions:</b> YAML Front Matter metadata cards, in-document <code>[TOC]</code> outline, offline KaTeX math formulas, Mermaid architecture diagrams, code copy buttons, and image click lightbox zoom.</li>
+        <li><b>Full Chinese & English Localization (i18n):</b> UI, settings, actions, and preview components adapt to IDE language or can be manually selected.</li>
         <li><b>Inspections & Quick Fixes:</b> PSI inspections for skipped heading hierarchy, unaligned tables, and empty links.</li>
-        <li><b>Export & Clipboard:</b> One-click Copy as Rendered HTML and Standalone HTML file export.</li>
+        <li><b>Export & Clipboard:</b> One-click Copy as Rendered HTML for publishing (WeChat, Zhihu, Notion) and Standalone HTML file export.</li>
     </ul>
     ]]></description>
 

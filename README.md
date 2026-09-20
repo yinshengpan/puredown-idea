@@ -1,66 +1,126 @@
-# PureDown Plugin for IntelliJ IDEA & Android Studio
+# PureDown 🚀
 
-**PureDown** 是专为 IntelliJ IDEA 与 Android Studio 打造的高能 Markdown 与知识库工作区插件。在深度对标官方 Markdown 插件基础体验的同时，吸纳了 **Markdown Pro** 的核心精髓功能。
+> 专为 **IntelliJ IDEA** 与 **Android Studio** 打造的现代高性能 Markdown 编辑、富文本渲染与知识管理插件。
 
----
-
-## 🌟 核心特色与功能特性
-
-### 1. 极速编写与编辑 (Write & Edit Faster)
-- **浮动格式化工具栏 (Floating Toolbar)**：在编辑器选中文字时自动浮出，一键进行加粗、斜体、删除线、行内代码、引用、链接、任务清单等格式化。
-- **内联表格编辑器 (Table Editor & Formatter)**：
-  - 自动对齐：一键将杂乱的 Markdown 表格排版整齐，完美支持中文/全角字符宽度计算（CJK Monospace）。
-  - 快捷插入：一键生成标准 Markdown 表格模板。
-  - 快捷键支持：`Option+Command+T` (Mac) / `Alt+Ctrl+T` (Win/Linux)。
-- **智能任务清单切换 (Smart Task Toggle)**：
-  - 无论是编辑器源码还是预览界面，一键/快捷键切换 `- [ ]` $\leftrightarrow$ `- [x]`。
-  - 快捷键支持：`Shift+Command+X` (Mac) / `Shift+Ctrl+X` (Win/Linux)。
-- **有序列表智能重排 (Ordered List Renumbering)**：一键重新规整编号列表为连续数字（1. 2. 3. ...）。
-
-### 2. 极致原地实时预览 (Accurate In-Place Preview)
-- **平滑双向滚动同步 (Smooth Scroll Sync)**：基于行级锚点映射（`data-source-line`），编辑器滚动时右侧预览精确同步。
-- **原地无闪烁更新 (In-Place DOM Diffing)**：输入打字时原地更新 DOM 内容，保持当前阅读与滚动位置，告别页面重载与白屏闪烁。
-- **全方位排版支持**：
-  - 代码高亮（支持 180+ 种语言语法高亮）
-  - LaTeX / 数学公式支持（`$E=mc^2$` 与 `$$\int...$$`）
-  - Mermaid 图表原生渲染（流程图、时序图、状态图、类图等）
-  - 深色/浅色自适应（Darcula、New UI Dark 与 Light 自动同步）
-- **一键富文本导出与复制**：
-  - **Copy Rendered HTML**：一键将渲染好的排版 HTML 复制到剪贴板，方便直接粘贴至邮件、Slack、语雀、Word、Teams 等。
-  - **Export as HTML**：一键导出带独立精美样式的离线 HTML 单文件。
-
-### 3. Obsidian 级知识库与双链支持 (Obsidian Vault Integration)
-- **`[[WikiLinks]]` 双向链接**：
-  - 输入 `[[` 自动触发全项目笔记自动补全提示。
-  - 支持 `[[Note Name]]`、`[[Note Name|自定义别名]]`。
-  - 点击双链直接在 IDE 中定位并打开对应笔记。
-- **Obsidian 警告框与提示框 (Callouts)**：
-  - 原生渲染 `> [!NOTE]`、`> [!TIP]`、`> [!WARNING]`、`> [!DANGER]`、`> [!CAUTION]`、`> [!IMPORTANT]`、`> [!SUCCESS]`、`> [!QUESTION]`、`> [!BUG]`、`> [!QUOTE]`。
-  - 带有醒目的颜色、状态图标与卡片式气泡样式。
-- **知识库关系图谱 (Knowledge Vault Graph)**：
-  - 可视化笔记拓扑图谱，实时扫描全项目 Markdown 文档及引用关系。
-  - 力导向物理引擎（Spring-Physics Simulation）自动展开排布。
-  - 支持节点搜索过滤、鼠标缩放平移、双击节点直接打开对应笔记文件！
-
-### 4. 文档健康与 PSI 质量检查 (Inspections & Quick Fixes)
-- **标题层级越级检查 (Heading Hierarchy)**：发现跳级标题（如从 H1 直接跳到 H3）时报警，并提供一键修复为连续层级的 QuickFix。
-- **表格列未对齐检查 (Unaligned Tables)**：自动高亮排版不齐的表格，提供一键对齐修整 QuickFix。
-- **空链接检查 (Empty Links)**：扫描发现 `[text]()` 或 `[](url)` 等无效链接并提示修复。
+PureDown 融合了轻量极速的原生多模式双栏布局、深度的排版与排版自动化工具、丰富的技术博客语法扩展（数学公式、Mermaid 图表、Callout 警告框、YAML 元数据卡片），并内置了 Obsidian 级别的双向链接与可视化知识图谱，为开发者提供开箱即用的一站式 Markdown 创作与知识管理体验。
 
 ---
 
-## 📦 安装与导入方式
+## 🌟 核心特性与功能介绍
 
-打包好的插件文件位于：
-- **桌面根目录**：`/Users/jasonyin/Desktop/puredown-1.0.0.zip`
-- **项目构建目录**：`/Users/jasonyin/Desktop/puredown/build/distributions/puredown-1.0.0.zip`
+### 1. 极速多模式编辑与原地即时预览
+- **三模式自由切换**：
+  - **双栏分屏 (Split Mode)**：左侧编辑源码，右侧毫秒级即时渲染。
+  - **仅编辑 (Editor Only)**：极致轻量专注，沉浸于代码与文字书写。
+  - **仅预览 (Preview Only)**：单栏全幅排版查阅与技术文档阅读。
+- **自定义默认打开模式**：
+  - 可在 **`Settings | Tools | PureDown`** 中自由配置打开 Markdown 文档时的默认视图模式（编辑+预览 / 仅编辑 / 仅预览）。
+- **双向平滑同步滚动 (Sync Scrolling)**：
+  - 精确行级锚点联动，滚动编辑区时预览区自动平滑跟随；支持工具栏一键开启/关闭。
+- **无闪烁原地实时渲染 (In-Place DOM Diffing)**：
+  - 打字输入时局部增量更新，保持当前阅读与视口位置，告别页面重载与白屏闪烁。
 
-### 在 IntelliJ IDEA 或 Android Studio 中安装：
-1. 打开 **IntelliJ IDEA** 或 **Android Studio**。
-2. 打开菜单栏：
-   - Mac: **IntelliJ IDEA (或 Android Studio) -> Settings (Preferences)**（快捷键 `Command + ,`）
-   - Windows/Linux: **File -> Settings**（快捷键 `Ctrl + Alt + S`）
-3. 选择左侧 **Plugins**。
-4. 点击顶部齿轮 ⚙️ 图标，选择 **Install Plugin from Disk...**（从磁盘安装插件...）。
-5. 选中桌面上的 **`puredown-1.0.0.zip`**，点击 **OK**。
-6. 点击 **Apply** 并重启 IDE 即可立即使用！
+---
+
+### 2. 智能编辑辅助与排版工具箱
+- **划词浮动排版工具栏 (Floating Toolbar)**：
+  - 在编辑器中选中文字时自动浮出，一键进行粗体、斜体、删除线、行内代码、插入超链接、引用区块与任务清单等格式化。
+- **CJK 智能表格排版与对齐 (Table Formatter)**：
+  - 自动识别中文字符与全角符号宽度，一键将错乱杂乱的 Markdown 表格排版得整整齐齐。
+  - 快捷键支持：`Option + Command + T` (macOS) / `Alt + Ctrl + T` (Windows/Linux)。
+  - 支持一键插入标准三列 Markdown 表格模板。
+- **智能任务清单一键切换 (Task Checkboxes)**：
+  - 无论在源码编辑器还是在预览页面，点击复选框均可即时在 `- [ ]` $\leftrightarrow$ `- [x]` 之间联动切换。
+  - 快捷键支持：`Shift + Command + X` (macOS) / `Shift + Ctrl + X` (Windows/Linux)。
+- **有序列表智能重排 (Auto-Renumbering)**：
+  - 一键重新连续规整编号列表（1. 2. 3. ...），无需手动计算行序。
+
+---
+
+### 3. 技术博客与学术排版全扩展
+- **YAML Front Matter 元数据卡片**：
+  - 自动识别文档开头的 YAML 头部信息（如 `title`、`date`、`author`、`tags`、`category` 等），并渲染为精美优雅的独立元数据卡片。
+- **文内动态目录大纲 (In-Document [TOC])**：
+  - 在正文中任意位置输入 `[TOC]` 或 `[[TOC]]`，自动生成交互式层级目录树，点击各级标题平滑滚动定位。
+- **代码高亮、语言徽标与一键复制**：
+  - 内置代码高亮引擎，代码块自带语言标签与右上角 **一键复制代码** 按钮，拷贝完成带即时动态反馈。
+- **100% 本地离线 KaTeX 数学公式渲染**：
+  - 内置 KaTeX 引擎与专属字体库，行内公式 `$E=mc^2$` 与块级公式 `$$\int_0^\infty e^{-x^2}dx$$` 毫秒级离线即时渲染，无需依赖外网。
+- **Mermaid 架构图表原生渲染**：
+  - 原生支持流程图（Flowchart）、时序图（Sequence Diagram）、类图（Class Diagram）、状态图（State Diagram）等架构图表。
+- **图片沉浸式灯箱放大预览 (Lightbox)**：
+  - 预览区点击任意图片即可全屏暗色居中放大预览，支持点击空白处或按下 `Esc` 退出。
+- **Obsidian 风格警告框 (Callouts)**：
+  - 原生支持 `> [!NOTE]`、`> [!TIP]`、`> [!WARNING]`、`> [!DANGER]`、`> [!IMPORTANT]`、`> [!CAUTION]`、`> [!SUCCESS]`、`> [!QUESTION]`、`> [!BUG]`、`> [!QUOTE]` 等 10+ 种高亮卡片与状态图标。
+
+---
+
+### 4. 底部实时文档统计状态栏
+- 编辑器底部常驻原生状态栏，实时响应光标移动与文本变化：
+  - **光标坐标**：实时指示 `行 X, 列 Y`（或 `Ln X, Col Y`）。
+  - **文档指标**：准确计算 `字符数`、`词数`（汉字 + 英文词组）、`行数`。
+  - **预估阅读时间**：采用中英文双阅读速率模型计算，显示 `⏱️ 约 N 分钟阅读`（`⏱️ ~N min read`）。
+  - **编码标准**：指示 `UTF-8` 编码状态。
+
+---
+
+### 5. Obsidian 级双链与可视化知识图谱
+- **`[[WikiLinks]]` 双向链接与自动补全**：
+  - 输入 `[[` 自动联想并补全整个工程目录下的所有 Markdown 笔记。
+  - 支持别名语法 `[[TargetNote|自定义别名]]`。
+  - 预览区点击双链或编辑器内 `Cmd/Ctrl + 点击` 即可直接定位并打开对应笔记。
+- **2D 力导向知识图谱 (Knowledge Vault Graph)**：
+  - 实时分析工程内所有 Markdown 文件的引用关联网络。
+  - 弹窗展示基于物理弹簧力导向模型排布的可视化网状图谱。
+  - 支持关键字搜索高亮过滤节点、滚轮平滑缩放、画布平移、双击节点直接打开对应笔记。
+
+---
+
+### 6. 文档质量与 PSI 代码检查 (Inspections)
+- **标题层级跳级检查 (Skipped heading level)**：检测从 H1 直接跳到 H3 等非规范层级，并提供一键降级修复。
+- **未对齐表格检查 (Unaligned Markdown table)**：自动识别列宽参差不齐的表格，提供一键格式化对齐。
+- **空链接检查 (Empty link)**：发现缺少 URL 或缺少文字的死链接并提示修复。
+
+---
+
+### 7. 全链路中英文双语支持 (i18n)
+- 界面语言支持 **自动跟随 IDE 语言**、**强制简体中文**、**强制 English**。
+- 设置项、状态栏、快捷工具栏、右键上下文菜单、检查提示、预览组件反馈均实现全链路双语本地化。
+
+---
+
+### 8. 便捷导出与富文本分享
+- **一键复制渲染后的富文本 HTML (Copy Rendered HTML)**：
+  - 将排版就绪的富文本直接复制到剪贴板，格式可直接粘贴至微信公众号、知乎专栏、语雀、Notion、飞书或电子邮件。
+- **导出独立 HTML 文件 (Export as Standalone HTML)**：
+  - 一键将 Markdown 转换为携带完整样式的单文件 HTML，脱机也能完整浏览。
+
+---
+
+## ⌨️ 常用快捷键速查
+
+| 功能操作 | macOS 快捷键 | Windows / Linux 快捷键 |
+| :--- | :--- | :--- |
+| **格式化对齐表格** | `Option + Command + T` | `Alt + Ctrl + T` |
+| **切换任务列表复选框** | `Shift + Command + X` | `Shift + Ctrl + X` |
+| **打开知识图谱** | 通过右键菜单 / 工具栏 图谱图标 | 通过右键菜单 / 工具栏 图谱图标 |
+| **粗体 / 斜体** | `Command + B` / `Command + I` | `Ctrl + B` / `Ctrl + I` |
+| **划词浮动工具栏** | 选中任何文本自动弹出 | 选中任何文本自动弹出 |
+
+---
+
+## 📦 插件安装与使用指南
+
+安装包可以直接在桌面上获取：
+- **桌面文件**：`/Users/jasonyin/Desktop/puredown-1.0.0.zip`
+
+### 安装步骤：
+1. 启动 **IntelliJ IDEA** 或 **Android Studio**。
+2. 打开设置对话框：
+   - **macOS**：点击顶部菜单 `IntelliJ IDEA (或 Android Studio) -> Settings...`（快捷键 `⌘ ,`）
+   - **Windows / Linux**：点击 `File -> Settings...`（快捷键 `Ctrl + Alt + S`）
+3. 在左侧面板选择 **`Plugins`**。
+4. 点击窗口顶部靠右侧的 ⚙️ **齿轮图标**，选择 **`Install Plugin from Disk...`**。
+5. 选中桌面上的 **`puredown-1.0.0.zip`** 并点击 **OK**。
+6. 点击 **Apply** 后重启 IDE，打开任意 `.md` / `.markdown` / `.mdx` 文件即可直接使用！
+7. 打开 **`Settings | Tools | PureDown`** 可随心定制默认视图模式、双向同步滚动、状态栏及各项渲染特性。
