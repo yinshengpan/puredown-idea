@@ -27,6 +27,13 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <b>Version 1.0.1</b>
+    <ul>
+        <li>Fixed ordered list rendering where all items displayed as "1." instead of sequential numbers (1, 2, 3...).</li>
+        <li>Added support for custom ordered list start indices (<ol start="...">).</li>
+        <li>Enhanced list parser with multi-level nested list support and line-continuation handling.</li>
+        <li>Optimized unordered list and task list item grouping, fixing large margin gaps between list items.</li>
+    </ul>
     <b>Version 1.0.0</b>
     <ul>
         <li>Initial release of PureDown for IntelliJ IDEA and Android Studio.</li>

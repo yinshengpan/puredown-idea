@@ -80,7 +80,7 @@ public class PureDownStatusBarPanel extends JPanel implements Disposable {
             public void caretPositionChanged(@NotNull CaretEvent event) {
                 updateCaretInfo();
             }
-        });
+        }, this);
 
         // Document listener
         editor.getDocument().addDocumentListener(new DocumentListener() {

@@ -1,5 +1,6 @@
 package com.puredown.editor;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -15,10 +16,11 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 
-public class PureDownFloatingToolbar {
+public class PureDownFloatingToolbar implements Disposable {
     private final Project project;
     private final Editor editor;
     private final JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 2));
+    private final SelectionListener selectionListener;
     private Popup popup = null;
     private boolean isVisible = false;
 
@@ -65,7 +67,7 @@ public class PureDownFloatingToolbar {
             }
         });
 
-        editor.getSelectionModel().addSelectionListener(new SelectionListener() {
+        this.selectionListener = new SelectionListener() {
             @Override
             public void selectionChanged(@NotNull SelectionEvent e) {
                 if (editor.getSelectionModel().hasSelection()) {
@@ -74,7 +76,8 @@ public class PureDownFloatingToolbar {
                     hideToolbar();
                 }
             }
-        });
+        };
+        editor.getSelectionModel().addSelectionListener(selectionListener);
     }
 
     private void addFormatButton(String text, String tooltip, Icon icon, Runnable action) {
@@ -146,6 +149,14 @@ public class PureDownFloatingToolbar {
             popup.hide();
             popup = null;
             isVisible = false;
+        }
+    }
+
+    @Override
+    public void dispose() {
+        hideToolbar();
+        if (selectionListener != null) {
+            editor.getSelectionModel().removeSelectionListener(selectionListener);
         }
     }
 }

@@ -33,7 +33,7 @@ public class PureDownCommandRunnerDialog extends DialogWrapper {
     private final JButton copyOutputButton = new JButton();
 
     public PureDownCommandRunnerDialog(@NotNull Project project, @NotNull String initialCommand) {
-        super(project, false);
+        super(project);
         this.project = project;
 
         setTitle(PureDownI18n.message("PureDown 快速命令执行 (Quick Runner)", "PureDown Quick Command Runner"));

@@ -48,6 +48,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
     private SplitLayoutMode layoutMode = SplitLayoutMode.SPLIT;
     private boolean isSyncScrollEnabled = true;
     private ActionToolbar actionToolbar;
+    private VisibleAreaListener visibleAreaListener;
     private volatile boolean myDisposed = false;
 
     public PureDownSplitEditor(Project project, VirtualFile file, TextEditor textEditor) {
@@ -64,6 +65,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
 
         Disposer.register(this, textEditor);
         Disposer.register(this, preview);
+        Disposer.register(this, floatingToolbar);
         Disposer.register(this, statusBarPanel);
 
         splitter.setFirstComponent(textEditor.getComponent());
@@ -106,7 +108,7 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
         }, this);
 
         // Scroll sync
-        textEditor.getEditor().getScrollingModel().addVisibleAreaListener(new VisibleAreaListener() {
+        this.visibleAreaListener = new VisibleAreaListener() {
             @Override
             public void visibleAreaChanged(@NotNull VisibleAreaEvent e) {
                 if (!isSyncScrollEnabled || layoutMode == SplitLayoutMode.EDITOR_ONLY) return;
@@ -115,7 +117,8 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
                 int line = ed.visualToLogicalPosition(vp).line;
                 preview.scrollToLine(line);
             }
-        });
+        };
+        textEditor.getEditor().getScrollingModel().addVisibleAreaListener(visibleAreaListener);
 
         schedulePreviewUpdate(0);
     }
@@ -314,6 +317,10 @@ public class PureDownSplitEditor extends UserDataHolderBase implements FileEdito
     @Override
     public void dispose() {
         myDisposed = true;
+        if (visibleAreaListener != null) {
+            textEditor.getEditor().getScrollingModel().removeVisibleAreaListener(visibleAreaListener);
+            visibleAreaListener = null;
+        }
         floatingToolbar.hideToolbar();
         updateAlarm.cancelAllRequests();
     }

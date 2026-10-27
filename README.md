@@ -123,7 +123,7 @@ PureDown 融合了轻量极速的原生多模式双栏布局、深度的排版�
 ## 📦 插件安装与使用指南
 
 安装包可以直接在桌面上获取：
-- **桌面文件**：`/Users/jasonyin/Desktop/puredown-1.0.0.zip`
+- **桌面文件**：`/Users/jasonyin/Desktop/puredown-1.0.1.zip`
 
 ### 安装步骤：
 1. 启动 **IntelliJ IDEA** 或 **Android Studio**。
@@ -132,6 +132,6 @@ PureDown 融合了轻量极速的原生多模式双栏布局、深度的排版�
    - **Windows / Linux**：点击 `File -> Settings...`（快捷键 `Ctrl + Alt + S`）
 3. 在左侧面板选择 **`Plugins`**。
 4. 点击窗口顶部靠右侧的 ⚙️ **齿轮图标**，选择 **`Install Plugin from Disk...`**。
-5. 选中桌面上的 **`puredown-1.0.0.zip`** 并点击 **OK**。
+5. 选中桌面上的 **`puredown-1.0.1.zip`** 并点击 **OK**。
 6. 点击 **Apply** 即可生效，打开任意 `.md` / `.markdown` / `.mdx` 文件即可直接使用！
 7. 打开 **`Settings | Tools | PureDown`** 可随心定制默认视图模式、双向同步滚动、状态栏及各项渲染特性。

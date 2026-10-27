@@ -52,7 +52,7 @@ public class PureDownVaultGraphPanel extends JPanel {
                 if (e.getClickCount() == 2) {
                     GraphNode clicked = findNodeAt(e.getX(), e.getY());
                     if (clicked != null) {
-                        FileEditorManager.getInstance(project).openFile(clicked.getFile(), true);
+                        new com.intellij.openapi.fileEditor.OpenFileDescriptor(project, clicked.getFile()).navigate(true);
                     }
                 }
             }

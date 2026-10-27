@@ -1,7 +1,9 @@
 package com.puredown.preview;
 
 import com.puredown.table.PureDownTableParser;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,9 @@ public final class PureDownHtmlGenerator {
     private static final Pattern MATH_INLINE_PATTERN = Pattern.compile("(^|[^\\\\$])\\$([^\\s\\$](?:[^\\$]*?[^\\s\\$])?)\\$");
     private static final Pattern CALLOUT_START_PATTERN = Pattern.compile("^>\\s*\\[!([a-zA-Z_-]+)\\](?:\\s+(.*))?$");
     private static final Pattern TOC_PATTERN = Pattern.compile("^\\[\\[?TOC\\]?\\]$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TASK_LIST_PATTERN = Pattern.compile("^[-*+]\\s+\\[([ xX])\\]\\s*(.*)$");
+    private static final Pattern UNORDERED_LIST_PATTERN = Pattern.compile("^[-*+]\\s+(.*)$");
+    private static final Pattern ORDERED_LIST_PATTERN = Pattern.compile("^(\\d+)\\.\\s+(.*)$");
     private static final Pattern HTML_BLOCK_PATTERN = Pattern.compile(
             "^</?(?:table|thead|tbody|tfoot|tr|th|td|div|p|blockquote|pre|details|summary|section|article|header|footer|nav|ul|ol|li|figure|figcaption|h[1-6]|span|b|i|u|s|strong|em|kbd|mark|sub|sup|br|hr|img|a|code|input|form|select|option|button|font|center)(?:\\s+[^>]*)?/?>.*$",
             Pattern.CASE_INSENSITIVE
@@ -43,6 +48,83 @@ public final class PureDownHtmlGenerator {
             this.title = title;
             this.slug = slug;
         }
+    }
+
+    private enum ListType {
+        ORDERED,
+        UNORDERED,
+        TASK
+    }
+
+    private static class ListItemInfo {
+        final ListType type;
+        final int indent;
+        final int startNum;
+        final boolean checked;
+        final String content;
+
+        ListItemInfo(ListType type, int indent, int startNum, boolean checked, String content) {
+            this.type = type;
+            this.indent = indent;
+            this.startNum = startNum;
+            this.checked = checked;
+            this.content = content;
+        }
+    }
+
+    private static class ListStackFrame {
+        final ListType type;
+        final int indent;
+        boolean hasOpenItem = false;
+
+        ListStackFrame(ListType type, int indent) {
+            this.type = type;
+            this.indent = indent;
+        }
+    }
+
+    private static int calculateIndent(String line) {
+        int count = 0;
+        for (int idx = 0; idx < line.length(); idx++) {
+            char c = line.charAt(idx);
+            if (c == ' ') {
+                count++;
+            } else if (c == '\t') {
+                count += 4;
+            } else {
+                break;
+            }
+        }
+        return count;
+    }
+
+    private static ListItemInfo parseListItem(String rawLine) {
+        if (rawLine == null) return null;
+        int indent = calculateIndent(rawLine);
+        String trimmed = rawLine.trim();
+        if (trimmed.isEmpty()) return null;
+
+        Matcher taskM = TASK_LIST_PATTERN.matcher(trimmed);
+        if (taskM.matches()) {
+            boolean checked = !" ".equals(taskM.group(1));
+            return new ListItemInfo(ListType.TASK, indent, 1, checked, taskM.group(2));
+        }
+
+        Matcher unorderedM = UNORDERED_LIST_PATTERN.matcher(trimmed);
+        if (unorderedM.matches()) {
+            return new ListItemInfo(ListType.UNORDERED, indent, 1, false, unorderedM.group(1));
+        }
+
+        Matcher orderedM = ORDERED_LIST_PATTERN.matcher(trimmed);
+        if (orderedM.matches()) {
+            int startNum = 1;
+            try {
+                startNum = Integer.parseInt(orderedM.group(1));
+            } catch (NumberFormatException ignored) {}
+            return new ListItemInfo(ListType.ORDERED, indent, startNum, false, orderedM.group(2));
+        }
+
+        return null;
     }
 
     public static String generateHtml(String markdown) {
@@ -274,35 +356,94 @@ public final class PureDownHtmlGenerator {
             }
 
             // 8. Lists
-            if (trimmed.startsWith("- [ ] ") || trimmed.startsWith("- [x] ") || trimmed.startsWith("- [X] ")) {
-                boolean checked = trimmed.startsWith("- [x] ") || trimmed.startsWith("- [X] ");
-                String content = trimmed.substring(6);
-                String checkedAttr = checked ? "checked" : "";
-                out.append("<ul class=\"task-list\"><li class=\"task-list-item\" data-source-line=\"").append(i).append("\">")
-                        .append("<input type=\"checkbox\" ").append(checkedAttr).append(" data-source-line=\"").append(i).append("\" />")
-                        .append(" ").append(formatInline(content))
-                        .append("</li></ul>\n");
-                i++;
-                continue;
-            }
+            ListItemInfo firstItem = parseListItem(line);
+            if (firstItem != null) {
+                Deque<ListStackFrame> listStack = new ArrayDeque<>();
+                while (i < rawLines.length) {
+                    String curRaw = rawLines[i];
+                    String curTrimmed = curRaw.trim();
+                    if (curTrimmed.isEmpty()) {
+                        break;
+                    }
+                    ListItemInfo item = parseListItem(curRaw);
+                    if (item != null) {
+                        while (!listStack.isEmpty() && listStack.peek().indent > item.indent) {
+                            ListStackFrame popped = listStack.pop();
+                            if (popped.hasOpenItem) {
+                                out.append("</li>\n");
+                            }
+                            out.append(popped.type == ListType.ORDERED ? "</ol>\n" : "</ul>\n");
+                        }
 
-            if (trimmed.startsWith("- ") || trimmed.startsWith("* ") || trimmed.startsWith("+ ")) {
-                String content = trimmed.substring(2);
-                out.append("<ul><li data-source-line=\"").append(i).append("\">")
-                        .append(formatInline(content))
-                        .append("</li></ul>\n");
-                i++;
-                continue;
-            }
+                        if (listStack.isEmpty() || listStack.peek().indent < item.indent) {
+                            ListStackFrame newFrame = new ListStackFrame(item.type, item.indent);
+                            listStack.push(newFrame);
+                            if (item.type == ListType.ORDERED) {
+                                String startAttr = item.startNum != 1 ? " start=\"" + item.startNum + "\"" : "";
+                                out.append("<ol").append(startAttr).append(">\n");
+                            } else if (item.type == ListType.TASK) {
+                                out.append("<ul class=\"task-list\">\n");
+                            } else {
+                                out.append("<ul>\n");
+                            }
+                        } else {
+                            ListStackFrame top = listStack.peek();
+                            if (top.type != item.type) {
+                                if (top.hasOpenItem) {
+                                    out.append("</li>\n");
+                                    top.hasOpenItem = false;
+                                }
+                                listStack.pop();
+                                out.append(top.type == ListType.ORDERED ? "</ol>\n" : "</ul>\n");
 
-            Pattern numPattern = Pattern.compile("^(\\d+)\\.\\s+(.*)$");
-            Matcher numMatcher = numPattern.matcher(trimmed);
-            if (numMatcher.find()) {
-                String content = numMatcher.group(2);
-                out.append("<ol><li data-source-line=\"").append(i).append("\">")
-                        .append(formatInline(content))
-                        .append("</li></ol>\n");
-                i++;
+                                ListStackFrame newFrame = new ListStackFrame(item.type, item.indent);
+                                listStack.push(newFrame);
+                                if (item.type == ListType.ORDERED) {
+                                    String startAttr = item.startNum != 1 ? " start=\"" + item.startNum + "\"" : "";
+                                    out.append("<ol").append(startAttr).append(">\n");
+                                } else if (item.type == ListType.TASK) {
+                                    out.append("<ul class=\"task-list\">\n");
+                                } else {
+                                    out.append("<ul>\n");
+                                }
+                            } else {
+                                if (top.hasOpenItem) {
+                                    out.append("</li>\n");
+                                    top.hasOpenItem = false;
+                                }
+                            }
+                        }
+
+                        ListStackFrame current = listStack.peek();
+                        if (item.type == ListType.TASK) {
+                            String checkedAttr = item.checked ? "checked " : "";
+                            out.append("  <li class=\"task-list-item\" data-source-line=\"").append(i).append("\">")
+                                    .append("<input type=\"checkbox\" ").append(checkedAttr).append("data-source-line=\"").append(i).append("\" /> ")
+                                    .append(formatInline(item.content));
+                        } else {
+                            out.append("  <li data-source-line=\"").append(i).append("\">")
+                                    .append(formatInline(item.content));
+                        }
+                        current.hasOpenItem = true;
+                        i++;
+                    } else {
+                        int indent = calculateIndent(curRaw);
+                        if (!listStack.isEmpty() && indent > listStack.peek().indent) {
+                            out.append("<br />").append(formatInline(curTrimmed));
+                            i++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                while (!listStack.isEmpty()) {
+                    ListStackFrame popped = listStack.pop();
+                    if (popped.hasOpenItem) {
+                        out.append("</li>\n");
+                    }
+                    out.append(popped.type == ListType.ORDERED ? "</ol>\n" : "</ul>\n");
+                }
                 continue;
             }
 

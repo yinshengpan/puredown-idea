@@ -17,7 +17,7 @@ public class PureDownVaultGraphDialog extends DialogWrapper {
     private final PureDownVaultGraphPanel graphPanel;
 
     public PureDownVaultGraphDialog(Project project) {
-        super(project, true);
+        super(project);
         this.project = project;
         this.graphData = PureDownVaultGraphService.buildGraph(project);
         this.graphPanel = new PureDownVaultGraphPanel(project, graphData);

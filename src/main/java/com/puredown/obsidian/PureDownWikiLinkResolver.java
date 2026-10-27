@@ -47,7 +47,7 @@ public final class PureDownWikiLinkResolver {
     public static void openNote(Project project, String rawTarget) {
         VirtualFile file = resolve(project, rawTarget);
         if (file != null) {
-            FileEditorManager.getInstance(project).openFile(file, true);
+            new com.intellij.openapi.fileEditor.OpenFileDescriptor(project, file).navigate(true);
         }
     }
 
