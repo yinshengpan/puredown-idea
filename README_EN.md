@@ -123,7 +123,7 @@ PureDown integrates a blazing-fast multi-mode split editor, in-place formatting 
 ## 📦 Installation Guide
 
 Download the plugin archive directly from the desktop:
-- **Archive Path**: `/Users/jasonyin/Desktop/puredown-1.0.1.zip`
+- **Archive Path**: `/Users/jasonyin/Desktop/puredown-1.0.3.zip`
 
 ### Installation Steps:
 1. Launch **IntelliJ IDEA** or **Android Studio**.
@@ -132,6 +132,6 @@ Download the plugin archive directly from the desktop:
    - **Windows / Linux**: Click `File -> Settings...` (Shortcut: `Ctrl + Alt + S`)
 3. In the left panel, select **`Plugins`**.
 4. Click the ⚙️ **Gear icon** in the top-right toolbar and select **`Install Plugin from Disk...`**.
-5. Select **`puredown-1.0.1.zip`** from your desktop and click **OK**.
+5. Select **`puredown-1.0.3.zip`** from your desktop and click **OK**.
 6. Click **Apply** to complete installation, and open any `.md` / `.markdown` / `.mdx` file to start writing!
 7. Navigate to **`Settings | Tools | PureDown`** to customize your layout mode, sync scrolling, and preview preferences.

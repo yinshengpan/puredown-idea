@@ -1,4 +1,6 @@
 <idea-plugin>
+    <version>1.0.3</version>
+    <idea-version since-build="233"/>
     <id>com.puredown.markdown</id>
     <name>PureDown</name>
     <vendor email="support@puredown.com" url="https://github.com/puredown/puredown">PureDown</vendor>
@@ -27,6 +29,13 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <b>Version 1.0.3</b>
+    <ul>
+        <li>Enhanced IntelliJ Platform 2024.1 - 2026.3 compatibility: migrated deprecated file navigation APIs to modern OpenFileDescriptor.</li>
+        <li>Improved dynamic plugin lifecycle: bound caret and visible area listeners to parent Disposable, preventing ClassLoader leaks upon plugin reload/unload.</li>
+        <li>Upgraded DialogWrapper constructors to standard single-parameter pattern.</li>
+        <li>Optimized list parser with sequential numbered lists and nested list indentation.</li>
+    </ul>
     <b>Version 1.0.1</b>
     <ul>
         <li>Fixed ordered list rendering where all items displayed as "1." instead of sequential numbers (1, 2, 3...).</li>
