@@ -192,40 +192,7 @@ public final class PureDownHtmlGenerator {
                 }
                 if (i < rawLines.length) i++; // skip closing fence
 
-                String rawCode = String.join("\n", codeLines);
-                String codeContent = escapeHtml(rawCode);
-                if ("mermaid".equals(lang)) {
-                    out.append("<div class=\"mermaid\" data-source-line=\"").append(startLine).append("\">")
-                            .append(codeContent)
-                            .append("</div>\n");
-                } else {
-                    String displayLang = lang.isEmpty() ? "text" : lang;
-                    boolean isExecutable = isExecutableCommand(lang, rawCode);
-
-                    String copyTitle = com.puredown.i18n.PureDownI18n.message("复制代码", "Copy code");
-                    String copyBtnText = com.puredown.i18n.PureDownI18n.message("📋 复制", "📋 Copy");
-                    String runTitle = com.puredown.i18n.PureDownI18n.message("快速执行命令", "Quick Run command");
-                    String runBtnText = com.puredown.i18n.PureDownI18n.message("▶️ 执行", "▶️ Run");
-
-                    out.append("<div class=\"code-block-wrapper\" data-source-line=\"").append(startLine).append("\">\n")
-                            .append("  <div class=\"code-header\">\n")
-                            .append("    <span class=\"code-lang\">").append(escapeHtml(displayLang)).append("</span>\n")
-                            .append("    <div class=\"code-actions\">\n");
-
-                    if (isExecutable) {
-                        out.append("      <button class=\"run-button\" onclick=\"executeCode(this)\" title=\"")
-                                .append(runTitle).append("\">").append(runBtnText).append("</button>\n");
-                    }
-
-                    out.append("      <button class=\"copy-button\" onclick=\"copyCode(this)\" title=\"")
-                                .append(copyTitle).append("\">").append(copyBtnText).append("</button>\n")
-                            .append("    </div>\n")
-                            .append("  </div>\n")
-                            .append("  <pre><code class=\"language-").append(displayLang).append("\">")
-                            .append(codeContent)
-                            .append("</code></pre>\n")
-                            .append("</div>\n");
-                }
+                renderCodeBlock(lang, codeLines, startLine, out);
                 continue;
             }
 
@@ -363,8 +330,51 @@ public final class PureDownHtmlGenerator {
                     String curRaw = rawLines[i];
                     String curTrimmed = curRaw.trim();
                     if (curTrimmed.isEmpty()) {
+                        // Look ahead to check if list continues after blank lines
+                        int nextIdx = i + 1;
+                        while (nextIdx < rawLines.length && rawLines[nextIdx].trim().isEmpty()) {
+                            nextIdx++;
+                        }
+                        if (nextIdx < rawLines.length) {
+                            String nextRaw = rawLines[nextIdx];
+                            String nextTrimmed = nextRaw.trim();
+                            ListItemInfo nextItem = parseListItem(nextRaw);
+                            int nextIndent = calculateIndent(nextRaw);
+                            if (nextItem != null || (!listStack.isEmpty() && nextIndent > listStack.peek().indent) || 
+                               (nextTrimmed.startsWith("```") && (nextIndent > 0 || (!listStack.isEmpty() && nextIndent >= listStack.peek().indent)))) {
+                                i++;
+                                continue;
+                            }
+                        }
                         break;
                     }
+
+                    // Check for nested code block inside list item
+                    if (curTrimmed.startsWith("```")) {
+                        int fenceIndent = calculateIndent(curRaw);
+                        if (!listStack.isEmpty() && fenceIndent < listStack.peek().indent && fenceIndent == 0) {
+                            break;
+                        }
+                        String lang = curTrimmed.substring(3).trim().toLowerCase();
+                        List<String> codeLines = new ArrayList<>();
+                        int startLine = i;
+                        i++;
+                        while (i < rawLines.length && !rawLines[i].trim().startsWith("```")) {
+                            String codeLine = rawLines[i];
+                            int cIndent = calculateIndent(codeLine);
+                            int strip = Math.min(fenceIndent, cIndent);
+                            if (strip > 0 && codeLine.length() >= strip) {
+                                codeLine = codeLine.substring(strip);
+                            }
+                            codeLines.add(codeLine);
+                            i++;
+                        }
+                        if (i < rawLines.length) i++; // skip closing fence
+
+                        renderCodeBlock(lang, codeLines, startLine, out);
+                        continue;
+                    }
+
                     ListItemInfo item = parseListItem(curRaw);
                     if (item != null) {
                         while (!listStack.isEmpty() && listStack.peek().indent > item.indent) {
@@ -449,11 +459,38 @@ public final class PureDownHtmlGenerator {
 
             // 9. Blockquote
             if (trimmed.startsWith(">")) {
-                String content = trimmed.substring(1).trim();
-                out.append("<blockquote data-source-line=\"").append(i).append("\"><p>")
-                        .append(formatInline(content))
-                        .append("</p></blockquote>\n");
-                i++;
+                int startLine = i;
+                List<String> bqLines = new ArrayList<>();
+                while (i < rawLines.length && (rawLines[i].trim().startsWith(">") || 
+                       (rawLines[i].trim().isEmpty() && i + 1 < rawLines.length && rawLines[i + 1].trim().startsWith(">")))) {
+                    String bqTrimmed = rawLines[i].trim();
+                    if (bqTrimmed.startsWith(">")) {
+                        bqLines.add(bqTrimmed.substring(1).trim());
+                    } else {
+                        bqLines.add("");
+                    }
+                    i++;
+                }
+
+                out.append("<blockquote data-source-line=\"").append(startLine).append("\">\n");
+                StringBuilder pBuilder = new StringBuilder();
+                for (String bqLine : bqLines) {
+                    if (bqLine.isEmpty()) {
+                        if (pBuilder.length() > 0) {
+                            out.append("  <p>").append(pBuilder).append("</p>\n");
+                            pBuilder.setLength(0);
+                        }
+                    } else {
+                        if (pBuilder.length() > 0) {
+                            pBuilder.append("<br />\n    ");
+                        }
+                        pBuilder.append(formatInline(bqLine));
+                    }
+                }
+                if (pBuilder.length() > 0) {
+                    out.append("  <p>").append(pBuilder).append("</p>\n");
+                }
+                out.append("</blockquote>\n");
                 continue;
             }
 
@@ -513,6 +550,43 @@ public final class PureDownHtmlGenerator {
         }
 
         return result;
+    }
+
+    private static void renderCodeBlock(String lang, List<String> codeLines, int startLine, StringBuilder out) {
+        String rawCode = String.join("\n", codeLines);
+        String codeContent = escapeHtml(rawCode);
+        if ("mermaid".equals(lang)) {
+            out.append("<div class=\"mermaid\" data-source-line=\"").append(startLine).append("\">")
+                    .append(codeContent)
+                    .append("</div>\n");
+        } else {
+            String displayLang = lang.isEmpty() ? "text" : lang;
+            boolean isExecutable = isExecutableCommand(lang, rawCode);
+
+            String copyTitle = com.puredown.i18n.PureDownI18n.message("复制代码", "Copy code");
+            String copyBtnText = com.puredown.i18n.PureDownI18n.message("📋 复制", "📋 Copy");
+            String runTitle = com.puredown.i18n.PureDownI18n.message("快速执行命令", "Quick Run command");
+            String runBtnText = com.puredown.i18n.PureDownI18n.message("▶️ 执行", "▶️ Run");
+
+            out.append("<div class=\"code-block-wrapper\" data-source-line=\"").append(startLine).append("\">\n")
+                    .append("  <div class=\"code-header\">\n")
+                    .append("    <span class=\"code-lang\">").append(escapeHtml(displayLang)).append("</span>\n")
+                    .append("    <div class=\"code-actions\">\n");
+
+            if (isExecutable) {
+                out.append("      <button class=\"run-button\" onclick=\"executeCode(this)\" title=\"")
+                        .append(runTitle).append("\">").append(runBtnText).append("</button>\n");
+            }
+
+            out.append("      <button class=\"copy-button\" onclick=\"copyCode(this)\" title=\"")
+                        .append(copyTitle).append("\">").append(copyBtnText).append("</button>\n")
+                    .append("    </div>\n")
+                    .append("  </div>\n")
+                    .append("  <pre><code class=\"language-").append(displayLang).append("\">")
+                    .append(codeContent)
+                    .append("</code></pre>\n")
+                    .append("</div>\n");
+        }
     }
 
     private static boolean isExecutableCommand(String lang, String rawCode) {

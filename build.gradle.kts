@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.puredown"
-version = "1.0.3"
+version = "1.0.4"
 
 repositories {
     mavenCentral()
@@ -17,6 +17,9 @@ intellij {
 dependencies {
     // Include all extra jars in lib if any
     compileOnly(fileTree(mapOf("dir" to "/Applications/Android Studio.app/Contents/lib", "include" to listOf("*.jar"))))
+    if (file("/Applications/IntelliJ IDEA.app/Contents/plugins/jcef-plugin/lib").exists()) {
+        compileOnly(fileTree(mapOf("dir" to "/Applications/IntelliJ IDEA.app/Contents/plugins/jcef-plugin/lib", "include" to listOf("**/*.jar"))))
+    }
 }
 
 tasks {
@@ -24,6 +27,8 @@ tasks {
         sourceCompatibility = "17"
         targetCompatibility = "17"
         options.encoding = "UTF-8"
+        options.isFork = true
+        options.forkOptions.javaHome = file("/Applications/Android Studio.app/Contents/jbr/Contents/Home")
     }
     patchPluginXml {
         sinceBuild.set("233")

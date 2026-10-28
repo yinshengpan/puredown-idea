@@ -66,6 +66,40 @@ public class PureDownHtmlGeneratorTest {
         Assert.assertTrue(html.contains("未完成任务"));
     }
 
+    @Test
+    public void testNestedCodeBlockInList() {
+        String md = "- **问题定位**: `MainTopBackgroud.kt`\n" +
+                "  ```diff\n" +
+                "  - fun MainTopBackgroud(maxHeight: Dp? = null, isPanel: Boolean = false)\n" +
+                "  + fun MainTopBackgroud(maxHeight: Dp? = null, isPanel: Boolean = true)\n" +
+                "  ```\n" +
+                "- **深度分析**:\n" +
+                "  经代码库检索...";
+
+        String html = PureDownHtmlGenerator.generateHtml(md);
+
+        // Code block should be rendered with code-block-wrapper and language-diff
+        Assert.assertTrue(html.contains("<div class=\"code-block-wrapper\""));
+        Assert.assertTrue(html.contains("language-diff"));
+        Assert.assertFalse("Leaked backticks found!", html.contains("```"));
+        // The subsequent list item should not be swallowed or reversed
+        Assert.assertTrue(html.contains("深度分析"));
+    }
+
+    @Test
+    public void testConsecutiveBlockquotes() {
+        String md = "> **生成时间**: 2026-10-28 17:45:37  \n" +
+                "> **项目工程**: `Unified-Andorid`  \n" +
+                "> **审查目标**: `分支 origin/dev-wayne`";
+
+        String html = PureDownHtmlGenerator.generateHtml(md);
+
+        Assert.assertEquals(1, countOccurrences(html, "<blockquote"));
+        Assert.assertEquals(1, countOccurrences(html, "</blockquote>"));
+        Assert.assertTrue(html.contains("生成时间"));
+        Assert.assertTrue(html.contains("Unified-Andorid"));
+    }
+
     public static void main(String[] args) {
         PureDownHtmlGeneratorTest test = new PureDownHtmlGeneratorTest();
         test.testOrderedListGrouping();
@@ -76,6 +110,10 @@ public class PureDownHtmlGeneratorTest {
         System.out.println("PASS: testNestedLists");
         test.testTaskList();
         System.out.println("PASS: testTaskList");
+        test.testNestedCodeBlockInList();
+        System.out.println("PASS: testNestedCodeBlockInList");
+        test.testConsecutiveBlockquotes();
+        System.out.println("PASS: testConsecutiveBlockquotes");
 
         // Verify the user's specific test case
         String userSnippet = "# AI 工具开发说明\n" +

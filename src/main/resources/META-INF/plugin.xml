@@ -1,5 +1,5 @@
 <idea-plugin>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <idea-version since-build="233"/>
     <id>com.puredown.markdown</id>
     <name>PureDown</name>
@@ -29,6 +29,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <b>Version 1.0.4</b>
+    <ul>
+        <li>Fixed list item parser to support nested code blocks (including diff/kotlin blocks), preventing backtick leakage and layout distortion.</li>
+        <li>Enhanced loose list handling with look-ahead across blank lines.</li>
+        <li>Aggregated consecutive blockquotes into a single unified card for improved readability.</li>
+    </ul>
     <b>Version 1.0.3</b>
     <ul>
         <li>Enhanced IntelliJ Platform 2024.1 - 2026.3 compatibility: migrated deprecated file navigation APIs to modern OpenFileDescriptor.</li>
